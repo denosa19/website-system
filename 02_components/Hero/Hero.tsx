@@ -1,3 +1,5 @@
+import type { HeroProps } from "./Hero.types";
+
 export default function Hero({
   title,
   subtitle,
@@ -10,4 +12,3 @@ export default function Hero({
     </section>
   );
 }
-import type { HeroProps } from "./Hero.types";
