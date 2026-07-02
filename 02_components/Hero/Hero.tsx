@@ -10,3 +10,4 @@ export default function Hero({
     </section>
   );
 }
+import type { HeroProps } from "./Hero.types";
