@@ -11,6 +11,8 @@ type ButtonProps = {
   size?: ButtonSize;
   href?: string;
   disabled?: boolean;
+  leftIcon?: ReactNode;
+  rightIcon?: ReactNode;
 };
 
 export default function Button({
@@ -19,6 +21,8 @@ export default function Button({
   size = "md",
   href,
   disabled = false,
+  leftIcon,
+  rightIcon,
 }: ButtonProps) {
   const variantClasses = {
     primary: `${theme.colors.primary} ${theme.colors.primaryHover}`,
@@ -37,7 +41,7 @@ export default function Button({
     : "";
 
   const classes = `
-    inline-flex items-center justify-center
+    inline-flex items-center justify-center gap-2
     ${theme.radius.button}
     ${sizeClasses[size]}
     ${theme.typography.button}
@@ -46,17 +50,25 @@ export default function Button({
     transition
   `;
 
+  const content = (
+    <>
+      {leftIcon && <span>{leftIcon}</span>}
+      <span>{children}</span>
+      {rightIcon && <span>{rightIcon}</span>}
+    </>
+  );
+
   if (href) {
     return (
       <Link href={disabled ? "#" : href} className={classes}>
-        {children}
+        {content}
       </Link>
     );
   }
 
   return (
     <button className={classes} disabled={disabled}>
-      {children}
+      {content}
     </button>
   );
 }
