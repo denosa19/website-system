@@ -1,3 +1,4 @@
+import Button from "../components/Button";
 export default function Home() {
   return (
     <main className="min-h-screen bg-neutral-950 text-white flex flex-col items-center justify-center px-6">
@@ -10,9 +11,7 @@ export default function Home() {
       </p>
 
       <div className="mt-12">
-        <button className="rounded-xl bg-white text-black px-8 py-4 font-semibold hover:bg-neutral-200 transition">
-          Projekt starten
-        </button>
+        <Button>Projekt starten</Button>
       </div>
     </main>
   );
