@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
 import { theme } from "../../styles/theme";
 
@@ -8,12 +9,14 @@ type ButtonProps = {
   children: ReactNode;
   variant?: ButtonVariant;
   size?: ButtonSize;
+  href?: string;
 };
 
 export default function Button({
   children,
   variant = "primary",
   size = "md",
+  href,
 }: ButtonProps) {
   const variantClasses = {
     primary: `${theme.colors.primary} ${theme.colors.primaryHover}`,
@@ -27,17 +30,22 @@ export default function Button({
     lg: "px-10 py-5 text-lg",
   };
 
-  return (
-    <button
-      className={`
-        ${theme.radius.button}
-        ${sizeClasses[size]}
-        ${theme.typography.button}
-        ${variantClasses[variant]}
-        transition
-      `}
-    >
-      {children}
-    </button>
-  );
+  const classes = `
+    inline-flex items-center justify-center
+    ${theme.radius.button}
+    ${sizeClasses[size]}
+    ${theme.typography.button}
+    ${variantClasses[variant]}
+    transition
+  `;
+
+  if (href) {
+    return (
+      <Link href={href} className={classes}>
+        {children}
+      </Link>
+    );
+  }
+
+  return <button className={classes}>{children}</button>;
 }
