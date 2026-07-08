@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { cn } from "../../lib/cn";
 import { theme } from "../../styles/theme";
 
 type ContainerProps = {
@@ -8,7 +9,7 @@ type ContainerProps = {
 
 export default function Container({ children, className = "" }: ContainerProps) {
   return (
-    <div className={`${theme.container.default} ${className}`}>
+    <div className={cn(theme.container.default, className)}>
       {children}
     </div>
   );

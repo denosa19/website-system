@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { cn } from "../../lib/cn";
 import { theme } from "../../styles/theme";
 
 type ButtonVariant = "primary" | "secondary";
@@ -25,29 +26,29 @@ export default function Button({
   rightIcon,
 }: ButtonProps) {
   const variantClasses = {
-    primary: `${theme.colors.primary} ${theme.colors.primaryHover}`,
+    primary: cn(theme.colors.primary, theme.colors.primaryHover),
     secondary: theme.colors.secondary,
   };
 
   const sizeClasses = {
-    sm: `${theme.spacing.buttonSm} text-sm`,
+    sm: cn(theme.spacing.buttonSm, "text-sm"),
     md: theme.spacing.buttonMd,
-    lg: `${theme.spacing.buttonLg} text-lg`,
+    lg: cn(theme.spacing.buttonLg, "text-lg"),
   };
 
   const disabledClasses = disabled
     ? "opacity-50 cursor-not-allowed pointer-events-none"
     : "";
 
-  const classes = `
-    inline-flex items-center justify-center gap-2
-    ${theme.radius.md}
-    ${sizeClasses[size]}
-    ${theme.typography.button}
-    ${variantClasses[variant]}
-    ${disabledClasses}
-    ${theme.animation.default}
-  `;
+  const classes = cn(
+    "inline-flex items-center justify-center gap-2",
+    theme.radius.md,
+    sizeClasses[size],
+    theme.typography.button,
+    variantClasses[variant],
+    disabledClasses,
+    theme.animation.default
+  );
 
   const content = (
     <>

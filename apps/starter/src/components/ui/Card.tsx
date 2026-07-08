@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { cn } from "../../lib/cn";
 import { theme } from "../../styles/theme";
 
 type CardProps = {
@@ -9,14 +10,14 @@ type CardProps = {
 export default function Card({ children, className = "" }: CardProps) {
   return (
     <div
-      className={`
-        ${theme.radius.lg}
-        ${theme.colors.border}
-        ${theme.colors.surfaceLight}
-        ${theme.spacing.md}
-        ${theme.shadow.sm}
-        ${className}
-      `}
+      className={cn(
+        theme.radius.lg,
+        theme.colors.border,
+        theme.colors.surfaceLight,
+        theme.spacing.md,
+        theme.shadow.sm,
+        className
+      )}
     >
       {children}
     </div>

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { cn } from "../../lib/cn";
 import { theme } from "../../styles/theme";
 
 type SectionSpacing = "sm" | "md" | "lg";
@@ -21,7 +22,7 @@ export default function Section({
   };
 
   return (
-    <section className={`${spacingClasses[spacing]} ${className}`}>
+    <section className={cn(spacingClasses[spacing], className)}>
       {children}
     </section>
   );
