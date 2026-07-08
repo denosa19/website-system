@@ -1,10 +1,9 @@
+import CustomerFilters from "../components/crm/CustomerFilters";
 import CustomerForm from "../components/crm/CustomerForm";
 import CustomerTable from "../components/crm/CustomerTable";
 import Sidebar from "../components/layout/Sidebar";
 import Topbar from "../components/layout/Topbar";
 import Button from "../components/ui/Button";
-import Input from "../components/ui/Input";
-import Select from "../components/ui/Select";
 
 export default function Dashboard() {
   return (
@@ -31,15 +30,8 @@ export default function Dashboard() {
               <CustomerForm />
             </div>
 
-            <div className="mt-8 flex gap-4">
-              <Input placeholder="Kunden suchen..." className="w-full max-w-md" />
-
-              <Select>
-                <option>Alle Status</option>
-                <option>Lead</option>
-                <option>Anfrage</option>
-                <option>Aktiv</option>
-              </Select>
+            <div className="mt-8">
+              <CustomerFilters />
             </div>
 
             <div className="mt-8">
