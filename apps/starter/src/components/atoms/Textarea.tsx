@@ -1,5 +1,6 @@
 import type { TextareaHTMLAttributes } from "react";
 import { cn } from "../../lib/cn";
+import Label from "./Label";
 import { theme } from "../../styles/theme";
 
 type TextareaProps = TextareaHTMLAttributes<HTMLTextAreaElement> & {
@@ -19,12 +20,9 @@ export default function Textarea({
   return (
     <div className="w-full">
       {label && (
-        <label
-          htmlFor={textareaId}
-          className="mb-2 block text-sm font-medium text-white"
-        >
+        <Label htmlFor={textareaId}>
           {label}
-        </label>
+        </Label>
       )}
 
       <textarea
@@ -38,7 +36,11 @@ export default function Textarea({
         {...props}
       />
 
-      {error && <p className="mt-2 text-sm text-red-400">{error}</p>}
+      {error && (
+        <p className="mt-2 text-sm text-red-400">
+          {error}
+        </p>
+      )}
     </div>
   );
 }
