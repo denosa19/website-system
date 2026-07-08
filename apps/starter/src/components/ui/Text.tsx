@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { theme } from "../../styles/theme";
 
 type TextVariant = "default" | "muted" | "large";
 
@@ -14,9 +15,9 @@ export default function Text({
   className = "",
 }: TextProps) {
   const styles = {
-    default: "text-base text-white",
-    muted: "text-base text-neutral-300",
-    large: "text-xl text-neutral-300",
+    default: `${theme.typography.body} ${theme.colors.text}`,
+    muted: `${theme.typography.body} ${theme.colors.muted}`,
+    large: `${theme.typography.large} ${theme.colors.muted}`,
   };
 
   return <p className={`${styles[variant]} ${className}`}>{children}</p>;

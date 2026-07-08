@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { theme } from "../../styles/theme";
 
 type HeadingLevel = "h1" | "h2" | "h3";
 
@@ -14,9 +15,9 @@ export default function Heading({
   className = "",
 }: HeadingProps) {
   const styles = {
-    h1: "text-5xl font-bold tracking-tight sm:text-6xl",
-    h2: "text-4xl font-bold tracking-tight sm:text-5xl",
-    h3: "text-2xl font-bold tracking-tight",
+    h1: theme.typography.h1,
+    h2: theme.typography.h2,
+    h3: theme.typography.h3,
   };
 
   const Tag = level;
