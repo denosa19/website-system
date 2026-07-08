@@ -1,5 +1,6 @@
 import Button from "../atoms/Button";
 import Logo from "../atoms/Logo";
+import Container from "../ui/Container";
 
 const navItems = [
   { label: "Leistungen", href: "#leistungen" },
@@ -10,7 +11,7 @@ const navItems = [
 export default function Header() {
   return (
     <header className="fixed left-0 top-0 z-50 w-full border-b border-white/10 bg-neutral-950/80 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+      <Container className="flex items-center justify-between py-4">
         <Logo />
 
         <nav className="hidden items-center gap-8 text-sm text-neutral-300 md:flex">
@@ -33,7 +34,7 @@ export default function Header() {
         >
           ☰
         </button>
-      </div>
+      </Container>
     </header>
   );
 }
