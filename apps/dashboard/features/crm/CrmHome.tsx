@@ -73,9 +73,16 @@ export default function CrmHome() {
 
     setSuccessMessage("Kunde wurde angelegt.");
 
-    setTimeout(() => {
-      setSuccessMessage("");
-    }, 3000);
+    setTimeout(() => setSuccessMessage(""), 3000);
+  }
+
+  function deleteCustomer(customerId: string) {
+    setCustomers((current) =>
+      current.filter((customer) => customer.id !== customerId)
+    );
+
+    setSuccessMessage("Kunde wurde gelöscht.");
+    setTimeout(() => setSuccessMessage(""), 3000);
   }
 
   return (
@@ -190,7 +197,10 @@ export default function CrmHome() {
       </div>
 
       <div className="mt-8">
-        <CustomerTable customers={filteredCustomers} />
+        <CustomerTable
+          customers={filteredCustomers}
+          onDeleteCustomer={deleteCustomer}
+        />
       </div>
     </section>
   );
