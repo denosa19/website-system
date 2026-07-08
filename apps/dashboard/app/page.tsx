@@ -1,3 +1,4 @@
+import CustomerForm from "../components/crm/CustomerForm";
 import CustomerTable from "../components/crm/CustomerTable";
 import Sidebar from "../components/layout/Sidebar";
 import Topbar from "../components/layout/Topbar";
@@ -24,6 +25,10 @@ export default function Dashboard() {
               </div>
 
               <Button>+ Neuer Kunde</Button>
+            </div>
+
+            <div className="mt-8">
+              <CustomerForm />
             </div>
 
             <div className="mt-8 flex gap-4">
