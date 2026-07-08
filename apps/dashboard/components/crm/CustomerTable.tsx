@@ -1,12 +1,7 @@
 import { customers } from "../../data/customers";
 import CustomerStatusBadge from "./CustomerStatusBadge";
-import EmptyCustomersState from "./EmptyCustomersState";
 
 export default function CustomerTable() {
-  if (customers.length === 0) {
-    return <EmptyCustomersState />;
-  }
-
   return (
     <div className="overflow-hidden rounded-2xl border border-neutral-800">
       <div className="grid grid-cols-5 border-b border-neutral-800 bg-neutral-900 px-6 py-4 text-sm text-neutral-400">
@@ -34,7 +29,6 @@ export default function CustomerTable() {
           </div>
 
           <div className="text-neutral-400">{customer.projects}</div>
-
           <div className="text-neutral-400">{customer.email}</div>
         </div>
       ))}
