@@ -1,7 +1,11 @@
-import { customers } from "../../data/customers";
+import type { Customer } from "../../types/customer";
 import CustomerStatusBadge from "./CustomerStatusBadge";
 
-export default function CustomerTable() {
+type CustomerTableProps = {
+  customers: Customer[];
+};
+
+export default function CustomerTable({ customers }: CustomerTableProps) {
   return (
     <div className="overflow-hidden rounded-2xl border border-neutral-800">
       <div className="grid grid-cols-5 border-b border-neutral-800 bg-neutral-900 px-6 py-4 text-sm text-neutral-400">
