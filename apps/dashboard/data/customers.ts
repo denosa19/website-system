@@ -1,4 +1,6 @@
-export const customers = [
+import type { Customer } from "../types/customer";
+
+export const customers: Customer[] = [
   {
     id: "cust_001",
     company: "Adler Gebäudetechnik",
