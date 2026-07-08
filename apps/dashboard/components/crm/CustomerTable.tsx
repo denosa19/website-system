@@ -1,4 +1,5 @@
 import { customers } from "../../data/customers";
+import CustomerStatusBadge from "./CustomerStatusBadge";
 
 export default function CustomerTable() {
   return (
@@ -14,11 +15,13 @@ export default function CustomerTable() {
       {customers.map((customer) => (
         <div
           key={customer.id}
-          className="grid grid-cols-5 px-6 py-5 text-sm hover:bg-neutral-900"
+          className="grid grid-cols-5 items-center px-6 py-5 text-sm hover:bg-neutral-900"
         >
           <div className="font-medium text-white">{customer.company}</div>
           <div className="text-neutral-400">{customer.industry}</div>
-          <div className="text-neutral-400">{customer.status}</div>
+          <div>
+            <CustomerStatusBadge status={customer.status} />
+          </div>
           <div className="text-neutral-400">{customer.projects}</div>
           <div className="text-neutral-400">{customer.email}</div>
         </div>
