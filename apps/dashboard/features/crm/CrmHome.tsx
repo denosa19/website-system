@@ -1,13 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { customers as initialCustomers } from "../../data/customers";
 import type { Customer, CustomerStatus } from "../../types/customer";
 import CustomerTable from "../../components/crm/CustomerTable";
 
+type StatusFilter = "Alle" | CustomerStatus;
+
 export default function CrmHome() {
   const [customers, setCustomers] = useState<Customer[]>(initialCustomers);
   const [successMessage, setSuccessMessage] = useState("");
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("Alle");
 
   const [formData, setFormData] = useState({
     company: "",
@@ -17,6 +21,20 @@ export default function CrmHome() {
     industry: "Handwerk",
     status: "Lead" as CustomerStatus,
   });
+
+  const filteredCustomers = useMemo(() => {
+    return customers.filter((customer) => {
+      const matchesSearch =
+        customer.company.toLowerCase().includes(search.toLowerCase()) ||
+        customer.email.toLowerCase().includes(search.toLowerCase()) ||
+        customer.industry.toLowerCase().includes(search.toLowerCase());
+
+      const matchesStatus =
+        statusFilter === "Alle" || customer.status === statusFilter;
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [customers, search, statusFilter]);
 
   function updateField(field: string, value: string) {
     setFormData((current) => ({
@@ -153,12 +171,18 @@ export default function CrmHome() {
 
       <div className="mt-8 flex gap-4">
         <input
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
           placeholder="Kunden suchen..."
           className="w-full max-w-md rounded-xl border border-neutral-800 bg-neutral-900 px-4 py-3 outline-none"
         />
 
-        <select className="rounded-xl border border-neutral-800 bg-neutral-900 px-4 py-3 outline-none">
-          <option>Alle Status</option>
+        <select
+          value={statusFilter}
+          onChange={(event) => setStatusFilter(event.target.value as StatusFilter)}
+          className="rounded-xl border border-neutral-800 bg-neutral-900 px-4 py-3 outline-none"
+        >
+          <option>Alle</option>
           <option>Lead</option>
           <option>Anfrage</option>
           <option>Aktiv</option>
@@ -166,7 +190,7 @@ export default function CrmHome() {
       </div>
 
       <div className="mt-8">
-        <CustomerTable customers={customers} />
+        <CustomerTable customers={filteredCustomers} />
       </div>
     </section>
   );
