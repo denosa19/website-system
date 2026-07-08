@@ -1,26 +1,4 @@
-const customers = [
-  {
-    company: "Adler Gebäudetechnik",
-    industry: "Handwerk",
-    status: "Aktiv",
-    projects: 1,
-    email: "info@adlergebaudetechnik.de",
-  },
-  {
-    company: "iTouch Academy",
-    industry: "Sport / Academy",
-    status: "Anfrage",
-    projects: 1,
-    email: "info@itouchacademy.com",
-  },
-  {
-    company: "Rhein-Neckar Abriss",
-    industry: "Dienstleistung",
-    status: "Lead",
-    projects: 0,
-    email: "info@example.de",
-  },
-];
+import { customers } from "../../data/customers";
 
 export default function CustomerTable() {
   return (
@@ -35,7 +13,7 @@ export default function CustomerTable() {
 
       {customers.map((customer) => (
         <div
-          key={customer.company}
+          key={customer.id}
           className="grid grid-cols-5 px-6 py-5 text-sm hover:bg-neutral-900"
         >
           <div className="font-medium text-white">{customer.company}</div>

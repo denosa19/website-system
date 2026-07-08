@@ -1,0 +1,32 @@
+export const customers = [
+  {
+    id: "cust_001",
+    company: "Adler Gebäudetechnik",
+    contactPerson: "Herr Adler",
+    industry: "Handwerk",
+    status: "Aktiv",
+    projects: 1,
+    email: "info@adlergebaudetechnik.de",
+    phone: "",
+  },
+  {
+    id: "cust_002",
+    company: "iTouch Academy",
+    contactPerson: "Ansprechpartner",
+    industry: "Sport / Academy",
+    status: "Anfrage",
+    projects: 1,
+    email: "info@itouchacademy.com",
+    phone: "",
+  },
+  {
+    id: "cust_003",
+    company: "Rhein-Neckar Abriss",
+    contactPerson: "Ansprechpartner",
+    industry: "Dienstleistung",
+    status: "Lead",
+    projects: 0,
+    email: "info@example.de",
+    phone: "",
+  },
+];
