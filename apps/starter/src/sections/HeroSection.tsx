@@ -3,6 +3,7 @@ import Container from "../components/ui/Container";
 import Heading from "../components/ui/Heading";
 import Section from "../components/ui/Section";
 import Text from "../components/ui/Text";
+import { siteConfig } from "../config/site";
 import { theme } from "../styles/theme";
 
 export default function HeroSection() {
@@ -18,20 +19,20 @@ export default function HeroSection() {
     >
       <Container className="flex flex-col items-center justify-center text-center">
         <Heading level="h1" className="mb-6">
-          Internet Firma
+          {siteConfig.company.name}
         </Heading>
 
         <Text variant="large" className="max-w-2xl">
-          Das modulare Website-System für moderne Unternehmen.
+          {siteConfig.company.slogan}
         </Text>
 
         <div className="mt-12 flex flex-col gap-4 sm:flex-row">
           <Button href="/kontakt" size="lg">
-            Projekt starten
+            {siteConfig.company.cta}
           </Button>
 
           <Button variant="secondary" size="lg">
-            Mehr erfahren
+            {siteConfig.company.secondaryCta}
           </Button>
         </div>
       </Container>

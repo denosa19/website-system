@@ -1,39 +1,29 @@
 import Button from "../atoms/Button";
-import Logo from "../atoms/Logo";
+import Logo from "../atoms/logo";
 import Container from "../ui/Container";
-
-const navItems = [
-  { label: "Leistungen", href: "#leistungen" },
-  { label: "Über uns", href: "#ueber-uns" },
-  { label: "Kontakt", href: "#kontakt" },
-];
+import { siteConfig } from "../../config/site";
 
 export default function Header() {
   return (
-    <header className="fixed left-0 top-0 z-50 w-full border-b border-white/10 bg-neutral-950/80 backdrop-blur">
-      <Container className="flex items-center justify-between py-4">
+    <header className="fixed left-0 right-0 top-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur">
+      <Container className="flex h-20 items-center justify-between">
         <Logo />
 
-        <nav className="hidden items-center gap-8 text-sm text-neutral-300 md:flex">
-          {navItems.map((item) => (
-            <a key={item.href} href={item.href} className="transition hover:text-white">
+        <nav className="hidden gap-10 md:flex">
+          {siteConfig.navigation.map((item) => (
+            <a
+              key={item.label}
+              href={item.href}
+              className="transition hover:text-neutral-300"
+            >
               {item.label}
             </a>
           ))}
         </nav>
 
-        <div className="hidden md:block">
-          <Button href="#kontakt" size="sm">
-            Anfrage starten
-          </Button>
-        </div>
-
-        <button
-          className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 text-white md:hidden"
-          aria-label="Menü öffnen"
-        >
-          ☰
-        </button>
+        <Button href="#kontakt">
+          Anfrage starten
+        </Button>
       </Container>
     </header>
   );
