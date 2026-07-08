@@ -1,5 +1,5 @@
 import Button from "../atoms/Button";
-import Logo from "../atoms/logo";
+import Logo from "../atoms/Logo";
 import Container from "../ui/Container";
 import { siteConfig } from "../../config/site";
 
