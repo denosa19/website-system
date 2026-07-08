@@ -1,10 +1,12 @@
 import Button from "../components/atoms/Button";
 import Container from "../components/ui/Container";
+import Section from "../components/ui/Section";
 import { theme } from "../styles/theme";
 
 export default function HeroSection() {
   return (
-    <section
+    <Section
+      spacing="lg"
       className={`
         min-h-screen
         flex items-center
@@ -13,11 +15,11 @@ export default function HeroSection() {
       `}
     >
       <Container className="flex flex-col items-center justify-center text-center">
-        <h1 className="text-6xl font-bold mb-6">
+        <h1 className="mb-6 text-6xl font-bold">
           Internet Firma
         </h1>
 
-        <p className="text-xl text-neutral-300 max-w-2xl">
+        <p className="max-w-2xl text-xl text-neutral-300">
           Das modulare Website-System für moderne Unternehmen.
         </p>
 
@@ -31,6 +33,6 @@ export default function HeroSection() {
           </Button>
         </div>
       </Container>
-    </section>
+    </Section>
   );
 }
