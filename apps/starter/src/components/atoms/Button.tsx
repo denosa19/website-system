@@ -26,14 +26,13 @@ export default function Button({
 }: ButtonProps) {
   const variantClasses = {
     primary: `${theme.colors.primary} ${theme.colors.primaryHover}`,
-    secondary:
-      "bg-transparent text-white border border-white hover:bg-white hover:text-black",
+    secondary: theme.colors.secondary,
   };
 
   const sizeClasses = {
-    sm: "px-4 py-2 text-sm",
-    md: theme.spacing.button,
-    lg: "px-10 py-5 text-lg",
+    sm: `${theme.spacing.buttonSm} text-sm`,
+    md: theme.spacing.buttonMd,
+    lg: `${theme.spacing.buttonLg} text-lg`,
   };
 
   const disabledClasses = disabled
@@ -42,12 +41,12 @@ export default function Button({
 
   const classes = `
     inline-flex items-center justify-center gap-2
-    ${theme.radius.button}
+    ${theme.radius.md}
     ${sizeClasses[size]}
     ${theme.typography.button}
     ${variantClasses[variant]}
     ${disabledClasses}
-    transition
+    ${theme.animation.default}
   `;
 
   const content = (

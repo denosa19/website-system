@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { theme } from "../../styles/theme";
 
 type ContainerProps = {
   children: ReactNode;
@@ -7,7 +8,7 @@ type ContainerProps = {
 
 export default function Container({ children, className = "" }: ContainerProps) {
   return (
-    <div className={`mx-auto w-full max-w-7xl px-6 ${className}`}>
+    <div className={`${theme.container.default} ${className}`}>
       {children}
     </div>
   );

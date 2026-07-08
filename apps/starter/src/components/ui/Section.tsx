@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { theme } from "../../styles/theme";
 
 type SectionSpacing = "sm" | "md" | "lg";
 
@@ -14,9 +15,9 @@ export default function Section({
   spacing = "lg",
 }: SectionProps) {
   const spacingClasses = {
-    sm: "py-12",
-    md: "py-20",
-    lg: "py-28",
+    sm: theme.spacing.sectionSm,
+    md: theme.spacing.sectionMd,
+    lg: theme.spacing.sectionLg,
   };
 
   return (

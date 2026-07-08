@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { theme } from "../../styles/theme";
 
 type CardProps = {
   children: ReactNode;
@@ -9,11 +10,11 @@ export default function Card({ children, className = "" }: CardProps) {
   return (
     <div
       className={`
-        rounded-2xl
-        border border-white/10
-        bg-white/5
-        p-6
-        shadow-sm
+        ${theme.radius.lg}
+        ${theme.colors.border}
+        ${theme.colors.surfaceLight}
+        ${theme.spacing.md}
+        ${theme.shadow.sm}
         ${className}
       `}
     >
