@@ -1,6 +1,9 @@
 import CustomerTable from "../components/crm/CustomerTable";
 import Sidebar from "../components/layout/Sidebar";
 import Topbar from "../components/layout/Topbar";
+import Button from "../components/ui/Button";
+import Input from "../components/ui/Input";
+import Select from "../components/ui/Select";
 
 export default function Dashboard() {
   return (
@@ -20,23 +23,18 @@ export default function Dashboard() {
                 </p>
               </div>
 
-              <button className="rounded-xl bg-white px-5 py-3 font-semibold text-black">
-                + Neuer Kunde
-              </button>
+              <Button>+ Neuer Kunde</Button>
             </div>
 
             <div className="mt-8 flex gap-4">
-              <input
-                placeholder="Kunden suchen..."
-                className="w-full max-w-md rounded-xl border border-neutral-800 bg-neutral-900 px-4 py-3 outline-none"
-              />
+              <Input placeholder="Kunden suchen..." className="w-full max-w-md" />
 
-              <select className="rounded-xl border border-neutral-800 bg-neutral-900 px-4 py-3 outline-none">
+              <Select>
                 <option>Alle Status</option>
                 <option>Lead</option>
                 <option>Anfrage</option>
                 <option>Aktiv</option>
-              </select>
+              </Select>
             </div>
 
             <div className="mt-8">
