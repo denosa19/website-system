@@ -1,10 +1,10 @@
 import AppShell from "../components/layout/AppShell";
-import CrmHome from "../features/crm/CrmHome";
+import DashboardHome from "../features/dashboard/DashboardHome";
 
 export default function Home() {
   return (
     <AppShell>
-      <CrmHome />
+      <DashboardHome />
     </AppShell>
   );
 }
