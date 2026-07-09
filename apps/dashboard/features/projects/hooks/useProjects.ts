@@ -65,8 +65,17 @@ export function useProjects() {
     );
   }
 
+  function updateProjectProgress(projectId: string, progress: number) {
+    setProjects((current) =>
+      current.map((project) =>
+        project.id === projectId
+          ? { ...project, progress: Math.min(100, Math.max(0, progress)) }
+          : project
+      )
+    );
+  }
+
   return {
-    projects,
     filteredProjects,
     search,
     setSearch,
@@ -74,5 +83,6 @@ export function useProjects() {
     setStatusFilter,
     createProject,
     deleteProject,
+    updateProjectProgress,
   };
 }

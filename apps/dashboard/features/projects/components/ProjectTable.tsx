@@ -4,9 +4,14 @@ import ProjectStatusBadge from "./ProjectStatusBadge";
 type Props = {
   projects: Project[];
   onDeleteProject: (projectId: string) => void;
+  onUpdateProgress: (projectId: string, progress: number) => void;
 };
 
-export default function ProjectTable({ projects, onDeleteProject }: Props) {
+export default function ProjectTable({
+  projects,
+  onDeleteProject,
+  onUpdateProgress,
+}: Props) {
   return (
     <div className="overflow-hidden rounded-2xl border border-neutral-800">
       <div className="grid grid-cols-8 border-b border-neutral-800 bg-neutral-900 px-6 py-4 text-sm text-neutral-400">
@@ -35,12 +40,16 @@ export default function ProjectTable({ projects, onDeleteProject }: Props) {
           <div className="text-neutral-400">{project.priority}</div>
 
           <div>
-            <div className="h-2 rounded-full bg-neutral-800">
-              <div
-                className="h-2 rounded-full bg-white"
-                style={{ width: `${project.progress}%` }}
-              />
-            </div>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={project.progress}
+              onChange={(event) =>
+                onUpdateProgress(project.id, Number(event.target.value))
+              }
+              className="w-full"
+            />
             <p className="mt-1 text-xs text-neutral-500">{project.progress}%</p>
           </div>
 

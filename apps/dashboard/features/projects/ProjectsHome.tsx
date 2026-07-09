@@ -14,6 +14,7 @@ export default function ProjectsHome() {
     setStatusFilter,
     createProject,
     deleteProject,
+    updateProjectProgress,
   } = useProjects();
 
   return (
@@ -42,6 +43,7 @@ export default function ProjectsHome() {
         <ProjectTable
           projects={filteredProjects}
           onDeleteProject={deleteProject}
+          onUpdateProgress={updateProjectProgress}
         />
       </div>
     </section>
