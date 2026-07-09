@@ -1,4 +1,8 @@
+"use client";
+
+import { useMemo, useState } from "react";
 import type { Project } from "../../../types/project";
+import ProjectModuleWorkspace from "./ProjectModuleWorkspace";
 import ProjectPhaseTimeline from "./ProjectPhaseTimeline";
 import ProjectPromptGenerator from "./ProjectPromptGenerator";
 import WebsiteWizard from "./WebsiteWizard";
@@ -9,6 +13,18 @@ type Props = {
 };
 
 export default function ProjectDetails({ project, onToggleTask }: Props) {
+  const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null);
+
+  const selectedModule = useMemo(() => {
+    if (!project) return null;
+
+    return (
+      project.modules.find((module) => module.id === selectedModuleId) ??
+      project.modules[0] ??
+      null
+    );
+  }, [project, selectedModuleId]);
+
   if (!project) {
     return (
       <div className="rounded-2xl border border-dashed border-neutral-800 p-8 text-neutral-400">
@@ -105,26 +121,37 @@ export default function ProjectDetails({ project, onToggleTask }: Props) {
         <h3 className="text-xl font-bold">Website-Module</h3>
 
         <div className="mt-6 space-y-3">
-          {project.modules.map((module) => (
-            <div
-              key={module.id}
-              className="rounded-xl border border-neutral-800 bg-neutral-950 p-4"
-            >
-              <div className="flex items-center justify-between">
-                <h4 className="font-semibold">{module.title}</h4>
+          {project.modules.map((module) => {
+            const active = selectedModule?.id === module.id;
 
-                <span className="text-sm text-neutral-400">
-                  {module.status}
-                </span>
-              </div>
+            return (
+              <button
+                key={module.id}
+                onClick={() => setSelectedModuleId(module.id)}
+                className={`w-full rounded-xl border p-4 text-left transition ${
+                  active
+                    ? "border-white bg-neutral-800"
+                    : "border-neutral-800 bg-neutral-950 hover:border-neutral-600"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <h4 className="font-semibold">{module.title}</h4>
 
-              <p className="mt-2 text-sm text-neutral-500">
-                {module.description}
-              </p>
-            </div>
-          ))}
+                  <span className="text-sm text-neutral-400">
+                    {module.status}
+                  </span>
+                </div>
+
+                <p className="mt-2 text-sm text-neutral-500">
+                  {module.description}
+                </p>
+              </button>
+            );
+          })}
         </div>
       </div>
+
+      <ProjectModuleWorkspace module={selectedModule} />
 
       <ProjectPromptGenerator project={project} />
 
