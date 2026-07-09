@@ -1,6 +1,7 @@
 import type { Project } from "../../../types/project";
 import ProjectPhaseTimeline from "./ProjectPhaseTimeline";
 import ProjectPromptGenerator from "./ProjectPromptGenerator";
+import WebsiteWizard from "./WebsiteWizard";
 
 type Props = {
   project: Project | null;
@@ -100,6 +101,8 @@ export default function ProjectDetails({ project, onToggleTask }: Props) {
       <ProjectPhaseTimeline project={project} />
 
       <ProjectPromptGenerator project={project} />
+
+      <WebsiteWizard project={project} />
     </div>
   );
 }
