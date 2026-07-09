@@ -83,6 +83,17 @@ export function useProjects() {
     );
   }
 
+  function updateProjectPriority(
+    projectId: string,
+    priority: ProjectPriority
+  ) {
+    setProjects((current) =>
+      current.map((project) =>
+        project.id === projectId ? { ...project, priority } : project
+      )
+    );
+  }
+
   return {
     filteredProjects,
     search,
@@ -93,5 +104,6 @@ export function useProjects() {
     deleteProject,
     updateProjectProgress,
     updateProjectStatus,
+    updateProjectPriority,
   };
 }

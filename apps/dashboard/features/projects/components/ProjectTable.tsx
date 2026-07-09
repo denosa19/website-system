@@ -1,10 +1,15 @@
-import type { Project, ProjectStatus } from "../../../types/project";
+import type {
+  Project,
+  ProjectPriority,
+  ProjectStatus,
+} from "../../../types/project";
 
 type Props = {
   projects: Project[];
   onDeleteProject: (projectId: string) => void;
   onUpdateProgress: (projectId: string, progress: number) => void;
   onUpdateStatus: (projectId: string, status: ProjectStatus) => void;
+  onUpdatePriority: (projectId: string, priority: ProjectPriority) => void;
 };
 
 const statuses: ProjectStatus[] = [
@@ -16,11 +21,14 @@ const statuses: ProjectStatus[] = [
   "Wartung",
 ];
 
+const priorities: ProjectPriority[] = ["Niedrig", "Normal", "Hoch"];
+
 export default function ProjectTable({
   projects,
   onDeleteProject,
   onUpdateProgress,
   onUpdateStatus,
+  onUpdatePriority,
 }: Props) {
   return (
     <div className="overflow-hidden rounded-2xl border border-neutral-800">
@@ -57,7 +65,22 @@ export default function ProjectTable({
             </select>
           </div>
 
-          <div className="text-neutral-400">{project.priority}</div>
+          <div>
+            <select
+              value={project.priority}
+              onChange={(event) =>
+                onUpdatePriority(
+                  project.id,
+                  event.target.value as ProjectPriority
+                )
+              }
+              className="rounded-full border border-neutral-700 bg-neutral-950 px-3 py-1 text-xs text-neutral-300 outline-none"
+            >
+              {priorities.map((priority) => (
+                <option key={priority}>{priority}</option>
+              ))}
+            </select>
+          </div>
 
           <div>
             <input
