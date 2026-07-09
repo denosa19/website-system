@@ -1,3 +1,5 @@
+import type { ProjectModule } from "./module";
+
 export type ProjectStatus =
   | "Anfrage"
   | "Angebot"
@@ -25,22 +27,14 @@ export type ProjectTask = {
 export type Project = {
   id: string;
   title: string;
-
   customerId: string;
-
   customer: string;
-
   type: ProjectType;
-
   status: ProjectStatus;
-
   priority: ProjectPriority;
-
   progress: number;
-
   deadline: string;
-
   owner: string;
-
   tasks: ProjectTask[];
+  modules: ProjectModule[];
 };

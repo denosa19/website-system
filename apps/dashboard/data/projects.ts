@@ -1,27 +1,18 @@
+import { defaultModules } from "./defaultModules";
 import type { Project } from "../types/project";
 
 export const projects: Project[] = [
   {
     id: "proj_001",
-
     title: "Adler Gebäudetechnik Website",
-
     customerId: "cust_001",
-
     customer: "Adler Gebäudetechnik",
-
     type: "Firmenwebseite",
-
     status: "Umsetzung",
-
     priority: "Hoch",
-
     progress: 65,
-
     deadline: "2026-07-20",
-
     owner: "Dennis",
-
     tasks: [
       {
         id: "task_001",
@@ -49,28 +40,19 @@ export const projects: Project[] = [
         completed: false,
       },
     ],
+    modules: structuredClone(defaultModules),
   },
   {
     id: "proj_002",
-
     title: "iTouch Academy Relaunch",
-
     customerId: "cust_002",
-
     customer: "iTouch Academy",
-
     type: "Academy",
-
     status: "Angebot",
-
     priority: "Normal",
-
     progress: 20,
-
     deadline: "2026-08-01",
-
     owner: "Dennis",
-
     tasks: [
       {
         id: "task_006",
@@ -88,5 +70,6 @@ export const projects: Project[] = [
         completed: false,
       },
     ],
+    modules: structuredClone(defaultModules),
   },
 ];

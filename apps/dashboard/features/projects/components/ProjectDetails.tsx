@@ -12,7 +12,8 @@ export default function ProjectDetails({ project, onToggleTask }: Props) {
   if (!project) {
     return (
       <div className="rounded-2xl border border-dashed border-neutral-800 p-8 text-neutral-400">
-        Wähle ein Projekt aus, um Details, Checkliste und AI-Prompt zu sehen.
+        Wähle ein Projekt aus, um Details, Checkliste, Module und AI-Prompt zu
+        sehen.
       </div>
     );
   }
@@ -99,6 +100,31 @@ export default function ProjectDetails({ project, onToggleTask }: Props) {
       </div>
 
       <ProjectPhaseTimeline project={project} />
+
+      <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
+        <h3 className="text-xl font-bold">Website-Module</h3>
+
+        <div className="mt-6 space-y-3">
+          {project.modules.map((module) => (
+            <div
+              key={module.id}
+              className="rounded-xl border border-neutral-800 bg-neutral-950 p-4"
+            >
+              <div className="flex items-center justify-between">
+                <h4 className="font-semibold">{module.title}</h4>
+
+                <span className="text-sm text-neutral-400">
+                  {module.status}
+                </span>
+              </div>
+
+              <p className="mt-2 text-sm text-neutral-500">
+                {module.description}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
 
       <ProjectPromptGenerator project={project} />
 
