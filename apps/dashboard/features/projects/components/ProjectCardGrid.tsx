@@ -3,6 +3,8 @@ import ProjectCard from "./ProjectCard";
 
 type Props = {
   projects: Project[];
+  selectedProjectId?: string | null;
+  onSelectProject: (projectId: string) => void;
   onDeleteProject: (projectId: string) => void;
   onUpdateProgress: (projectId: string, progress: number) => void;
   onUpdateStatus: (projectId: string, status: ProjectStatus) => void;
@@ -11,6 +13,8 @@ type Props = {
 
 export default function ProjectCardGrid({
   projects,
+  selectedProjectId,
+  onSelectProject,
   onDeleteProject,
   onUpdateProgress,
   onUpdateStatus,
@@ -22,6 +26,8 @@ export default function ProjectCardGrid({
         <ProjectCard
           key={project.id}
           project={project}
+          selected={selectedProjectId === project.id}
+          onSelectProject={onSelectProject}
           onDeleteProject={onDeleteProject}
           onUpdateProgress={onUpdateProgress}
           onUpdateStatus={onUpdateStatus}

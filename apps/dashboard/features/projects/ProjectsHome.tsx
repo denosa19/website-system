@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import EmptyProjectsState from "./components/EmptyProjectsState";
 import ProjectCardGrid from "./components/ProjectCardGrid";
+import ProjectDetails from "./components/ProjectDetails";
 import ProjectFilters from "./components/ProjectFilters";
 import ProjectForm from "./components/ProjectForm";
+import ProjectStats from "./components/ProjectStats";
 import ProjectTable from "./components/ProjectTable";
 import { useProjects } from "./hooks/useProjects";
 
@@ -11,6 +14,9 @@ type ViewMode = "table" | "cards";
 
 export default function ProjectsHome() {
   const [viewMode, setViewMode] = useState<ViewMode>("table");
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
+    null
+  );
 
   const {
     filteredProjects,
@@ -24,6 +30,21 @@ export default function ProjectsHome() {
     updateProjectStatus,
     updateProjectPriority,
   } = useProjects();
+
+  const selectedProject = useMemo(
+    () =>
+      filteredProjects.find((project) => project.id === selectedProjectId) ??
+      null,
+    [filteredProjects, selectedProjectId]
+  );
+
+  function handleDeleteProject(projectId: string) {
+    deleteProject(projectId);
+
+    if (selectedProjectId === projectId) {
+      setSelectedProjectId(null);
+    }
+  }
 
   return (
     <section>
@@ -61,6 +82,10 @@ export default function ProjectsHome() {
       </div>
 
       <div className="mt-8">
+        <ProjectStats projects={filteredProjects} />
+      </div>
+
+      <div className="mt-8">
         <ProjectForm onCreate={createProject} />
       </div>
 
@@ -73,24 +98,34 @@ export default function ProjectsHome() {
         />
       </div>
 
-      <div className="mt-8">
-        {viewMode === "table" ? (
-          <ProjectTable
-            projects={filteredProjects}
-            onDeleteProject={deleteProject}
-            onUpdateProgress={updateProjectProgress}
-            onUpdateStatus={updateProjectStatus}
-            onUpdatePriority={updateProjectPriority}
-          />
-        ) : (
-          <ProjectCardGrid
-            projects={filteredProjects}
-            onDeleteProject={deleteProject}
-            onUpdateProgress={updateProjectProgress}
-            onUpdateStatus={updateProjectStatus}
-            onUpdatePriority={updateProjectPriority}
-          />
-        )}
+      <div className="mt-8 grid gap-8 xl:grid-cols-[2fr_1fr]">
+        <div>
+          {filteredProjects.length === 0 ? (
+            <EmptyProjectsState />
+          ) : viewMode === "table" ? (
+            <ProjectTable
+              projects={filteredProjects}
+              selectedProjectId={selectedProjectId}
+              onSelectProject={setSelectedProjectId}
+              onDeleteProject={handleDeleteProject}
+              onUpdateProgress={updateProjectProgress}
+              onUpdateStatus={updateProjectStatus}
+              onUpdatePriority={updateProjectPriority}
+            />
+          ) : (
+            <ProjectCardGrid
+              projects={filteredProjects}
+              selectedProjectId={selectedProjectId}
+              onSelectProject={setSelectedProjectId}
+              onDeleteProject={handleDeleteProject}
+              onUpdateProgress={updateProjectProgress}
+              onUpdateStatus={updateProjectStatus}
+              onUpdatePriority={updateProjectPriority}
+            />
+          )}
+        </div>
+
+        <ProjectDetails project={selectedProject} />
       </div>
     </section>
   );

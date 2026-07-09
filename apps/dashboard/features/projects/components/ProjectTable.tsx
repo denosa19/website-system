@@ -6,6 +6,8 @@ import type {
 
 type Props = {
   projects: Project[];
+  selectedProjectId?: string | null;
+  onSelectProject: (projectId: string) => void;
   onDeleteProject: (projectId: string) => void;
   onUpdateProgress: (projectId: string, progress: number) => void;
   onUpdateStatus: (projectId: string, status: ProjectStatus) => void;
@@ -25,6 +27,8 @@ const priorities: ProjectPriority[] = ["Niedrig", "Normal", "Hoch"];
 
 export default function ProjectTable({
   projects,
+  selectedProjectId,
+  onSelectProject,
   onDeleteProject,
   onUpdateProgress,
   onUpdateStatus,
@@ -43,70 +47,82 @@ export default function ProjectTable({
         <div>Aktion</div>
       </div>
 
-      {projects.map((project) => (
-        <div
-          key={project.id}
-          className="grid grid-cols-8 items-center border-b border-neutral-900 px-6 py-5 text-sm last:border-b-0 hover:bg-neutral-900"
-        >
-          <div className="font-medium text-white">{project.title}</div>
-          <div className="text-neutral-400">{project.customer}</div>
+      {projects.map((project) => {
+        const selected = selectedProjectId === project.id;
 
-          <div>
-            <select
-              value={project.status}
-              onChange={(event) =>
-                onUpdateStatus(project.id, event.target.value as ProjectStatus)
-              }
-              className="rounded-full border border-neutral-700 bg-neutral-950 px-3 py-1 text-xs text-neutral-300 outline-none"
-            >
-              {statuses.map((status) => (
-                <option key={status}>{status}</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <select
-              value={project.priority}
-              onChange={(event) =>
-                onUpdatePriority(
-                  project.id,
-                  event.target.value as ProjectPriority
-                )
-              }
-              className="rounded-full border border-neutral-700 bg-neutral-950 px-3 py-1 text-xs text-neutral-300 outline-none"
-            >
-              {priorities.map((priority) => (
-                <option key={priority}>{priority}</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={project.progress}
-              onChange={(event) =>
-                onUpdateProgress(project.id, Number(event.target.value))
-              }
-              className="w-full"
-            />
-            <p className="mt-1 text-xs text-neutral-500">{project.progress}%</p>
-          </div>
-
-          <div className="text-neutral-400">{project.deadline}</div>
-          <div className="text-neutral-400">{project.owner}</div>
-
-          <button
-            onClick={() => onDeleteProject(project.id)}
-            className="text-left text-red-400 hover:text-red-300"
+        return (
+          <div
+            key={project.id}
+            onClick={() => onSelectProject(project.id)}
+            className={`grid cursor-pointer grid-cols-8 items-center border-b border-neutral-900 px-6 py-5 text-sm last:border-b-0 ${
+              selected ? "bg-neutral-800" : "hover:bg-neutral-900"
+            }`}
           >
-            Löschen
-          </button>
-        </div>
-      ))}
+            <div className="font-medium text-white">{project.title}</div>
+            <div className="text-neutral-400">{project.customer}</div>
+
+            <div>
+              <select
+                value={project.status}
+                onClick={(event) => event.stopPropagation()}
+                onChange={(event) =>
+                  onUpdateStatus(project.id, event.target.value as ProjectStatus)
+                }
+                className="rounded-full border border-neutral-700 bg-neutral-950 px-3 py-1 text-xs text-neutral-300 outline-none"
+              >
+                {statuses.map((status) => (
+                  <option key={status}>{status}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <select
+                value={project.priority}
+                onClick={(event) => event.stopPropagation()}
+                onChange={(event) =>
+                  onUpdatePriority(
+                    project.id,
+                    event.target.value as ProjectPriority
+                  )
+                }
+                className="rounded-full border border-neutral-700 bg-neutral-950 px-3 py-1 text-xs text-neutral-300 outline-none"
+              >
+                {priorities.map((priority) => (
+                  <option key={priority}>{priority}</option>
+                ))}
+              </select>
+            </div>
+
+            <div onClick={(event) => event.stopPropagation()}>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={project.progress}
+                onChange={(event) =>
+                  onUpdateProgress(project.id, Number(event.target.value))
+                }
+                className="w-full"
+              />
+              <p className="mt-1 text-xs text-neutral-500">{project.progress}%</p>
+            </div>
+
+            <div className="text-neutral-400">{project.deadline}</div>
+            <div className="text-neutral-400">{project.owner}</div>
+
+            <button
+              onClick={(event) => {
+                event.stopPropagation();
+                onDeleteProject(project.id);
+              }}
+              className="text-left text-red-400 hover:text-red-300"
+            >
+              Löschen
+            </button>
+          </div>
+        );
+      })}
     </div>
   );
 }

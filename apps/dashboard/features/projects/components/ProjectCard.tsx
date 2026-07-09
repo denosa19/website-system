@@ -6,6 +6,8 @@ import type {
 
 type Props = {
   project: Project;
+  selected?: boolean;
+  onSelectProject: (projectId: string) => void;
   onDeleteProject: (projectId: string) => void;
   onUpdateProgress: (projectId: string, progress: number) => void;
   onUpdateStatus: (projectId: string, status: ProjectStatus) => void;
@@ -25,13 +27,22 @@ const priorities: ProjectPriority[] = ["Niedrig", "Normal", "Hoch"];
 
 export default function ProjectCard({
   project,
+  selected = false,
+  onSelectProject,
   onDeleteProject,
   onUpdateProgress,
   onUpdateStatus,
   onUpdatePriority,
 }: Props) {
   return (
-    <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
+    <div
+      onClick={() => onSelectProject(project.id)}
+      className={`cursor-pointer rounded-2xl border p-6 ${
+        selected
+          ? "border-white bg-neutral-800"
+          : "border-neutral-800 bg-neutral-900"
+      }`}
+    >
       <div className="flex items-start justify-between gap-4">
         <div>
           <h3 className="text-xl font-bold">{project.title}</h3>
@@ -39,7 +50,10 @@ export default function ProjectCard({
         </div>
 
         <button
-          onClick={() => onDeleteProject(project.id)}
+          onClick={(event) => {
+            event.stopPropagation();
+            onDeleteProject(project.id);
+          }}
           className="text-sm text-red-400 hover:text-red-300"
         >
           Löschen
@@ -49,6 +63,7 @@ export default function ProjectCard({
       <div className="mt-6 grid gap-4">
         <select
           value={project.status}
+          onClick={(event) => event.stopPropagation()}
           onChange={(event) =>
             onUpdateStatus(project.id, event.target.value as ProjectStatus)
           }
@@ -61,6 +76,7 @@ export default function ProjectCard({
 
         <select
           value={project.priority}
+          onClick={(event) => event.stopPropagation()}
           onChange={(event) =>
             onUpdatePriority(
               project.id,
@@ -74,7 +90,7 @@ export default function ProjectCard({
           ))}
         </select>
 
-        <div>
+        <div onClick={(event) => event.stopPropagation()}>
           <input
             type="range"
             min="0"
