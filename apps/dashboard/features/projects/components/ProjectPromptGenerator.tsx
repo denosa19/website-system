@@ -1,4 +1,7 @@
+"use client";
+
 import type { Project } from "../../../types/project";
+import { downloadTextFile } from "../../../lib/download";
 
 type Props = {
   project: Project;
@@ -6,7 +9,7 @@ type Props = {
 
 function createPrompt(project: Project) {
   return `
-Erstelle eine moderne, professionelle Website für folgendes Projekt:
+Erstelle eine moderne, professionelle Website.
 
 Projektname:
 ${project.title}
@@ -17,29 +20,36 @@ ${project.customer}
 Projekttyp:
 ${project.type}
 
-Status:
+Projektstatus:
 ${project.status}
 
-Ziel:
-Eine schnelle, responsive, SEO-optimierte Website mit klarem Design und professioneller Wirkung.
-
-Pflichtbereiche:
+Projektaufgaben:
 ${project.tasks.map((task) => `- ${task.title}`).join("\n")}
 
-Technische Anforderungen:
-- Responsive Design
+Anforderungen:
+
+- Responsive
 - Mobile First
-- SEO-Grundstruktur
-- Schnelle Ladezeiten
-- Saubere Navigation
-- Kontaktmöglichkeit
-- Impressum und Datenschutz berücksichtigen
+- SEO optimiert
+- Hohe Performance
+- Moderne UI
+- Saubere Komponentenstruktur
+- Skalierbar
+- Professionelles Design
 
-Designrichtung:
-Modern, vertrauenswürdig, klar, hochwertig und passend zur Branche.
+Erstelle:
 
-Ausgabe:
-Erstelle eine vollständige Website-Struktur mit Seiten, Sektionen, Textvorschlägen und konkreten Umsetzungshinweisen.
+- komplette Seitenstruktur
+- Komponenten
+- Designideen
+- SEO
+- Texte
+- CTA
+- Navigation
+- Footer
+- Kontaktformular
+
+Nutze aktuelle Best Practices.
 `.trim();
 }
 
@@ -48,28 +58,50 @@ export default function ProjectPromptGenerator({ project }: Props) {
 
   async function copyPrompt() {
     await navigator.clipboard.writeText(prompt);
-    alert("Prompt wurde kopiert.");
+    alert("Prompt kopiert.");
+  }
+
+  function exportPrompt() {
+    downloadTextFile(
+      `${project.title.replace(/\s+/g, "_")}_Prompt.txt`,
+      prompt
+    );
   }
 
   return (
     <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex items-center justify-between">
+
         <div>
-          <h3 className="text-xl font-bold">AI-Studio-Prompt</h3>
+          <h3 className="text-xl font-bold">
+            AI Studio Prompt
+          </h3>
+
           <p className="mt-2 text-sm text-neutral-400">
-            Automatisch aus Projektdaten und Checkliste generiert.
+            Automatisch generiert
           </p>
         </div>
 
-        <button
-          onClick={copyPrompt}
-          className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-black"
-        >
-          Prompt kopieren
-        </button>
+        <div className="flex gap-3">
+
+          <button
+            onClick={copyPrompt}
+            className="rounded-xl bg-white px-4 py-2 font-semibold text-black"
+          >
+            Kopieren
+          </button>
+
+          <button
+            onClick={exportPrompt}
+            className="rounded-xl border border-neutral-700 px-4 py-2"
+          >
+            Export
+          </button>
+
+        </div>
       </div>
 
-      <pre className="mt-6 max-h-96 overflow-auto whitespace-pre-wrap rounded-xl border border-neutral-800 bg-neutral-950 p-4 text-sm text-neutral-300">
+      <pre className="mt-6 max-h-[500px] overflow-auto whitespace-pre-wrap rounded-xl border border-neutral-800 bg-neutral-950 p-5 text-sm text-neutral-300">
         {prompt}
       </pre>
     </div>
