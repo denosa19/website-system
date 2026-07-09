@@ -1,16 +1,20 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { projectTemplates } from "../../../data/projectTemplates";
 import { projects as initialProjects } from "../../../data/projects";
 import type {
   Project,
   ProjectPriority,
   ProjectStatus,
+  ProjectType,
 } from "../../../types/project";
 
 type CreateProjectData = {
   title: string;
   customer: string;
+  customerId?: string;
+  type: ProjectType;
   status: ProjectStatus;
   priority: ProjectPriority;
   deadline: string;
@@ -19,34 +23,12 @@ type CreateProjectData = {
 
 type ProjectStatusFilter = "Alle" | ProjectStatus;
 
-function createDefaultTasks(projectId: string) {
-  return [
-    {
-      id: `${projectId}_task_001`,
-      title: "Kundendaten prüfen",
-      completed: false,
-    },
-    {
-      id: `${projectId}_task_002`,
-      title: "AI Studio Prompt erstellen",
-      completed: false,
-    },
-    {
-      id: `${projectId}_task_003`,
-      title: "Website prüfen",
-      completed: false,
-    },
-    {
-      id: `${projectId}_task_004`,
-      title: "SEO Grundcheck",
-      completed: false,
-    },
-    {
-      id: `${projectId}_task_005`,
-      title: "Go-Live vorbereiten",
-      completed: false,
-    },
-  ];
+function createTasksFromTemplate(projectId: string, type: ProjectType) {
+  return projectTemplates[type].map((title, index) => ({
+    id: `${projectId}_task_${index + 1}`,
+    title,
+    completed: false,
+  }));
 }
 
 export function useProjects() {
@@ -80,13 +62,15 @@ export function useProjects() {
     const newProject: Project = {
       id,
       title: data.title,
+      customerId: data.customerId || `manual_${Date.now()}`,
       customer: data.customer,
+      type: data.type,
       status: data.status,
       priority: data.priority,
       progress: 0,
       deadline: data.deadline,
       owner: data.owner || "Dennis",
-      tasks: createDefaultTasks(id),
+      tasks: createTasksFromTemplate(id, data.type),
     };
 
     setProjects((current) => [newProject, ...current]);
@@ -116,10 +100,7 @@ export function useProjects() {
     );
   }
 
-  function updateProjectPriority(
-    projectId: string,
-    priority: ProjectPriority
-  ) {
+  function updateProjectPriority(projectId: string, priority: ProjectPriority) {
     setProjects((current) =>
       current.map((project) =>
         project.id === projectId ? { ...project, priority } : project

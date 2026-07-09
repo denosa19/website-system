@@ -1,12 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import type { ProjectPriority, ProjectStatus } from "../../../types/project";
+import type {
+  ProjectPriority,
+  ProjectStatus,
+  ProjectType,
+} from "../../../types/project";
 
 type Props = {
   onCreate: (project: {
     title: string;
     customer: string;
+    customerId?: string;
+    type: ProjectType;
     status: ProjectStatus;
     priority: ProjectPriority;
     deadline: string;
@@ -18,6 +24,8 @@ export default function ProjectForm({ onCreate }: Props) {
   const [formData, setFormData] = useState({
     title: "",
     customer: "",
+    customerId: "",
+    type: "Firmenwebseite" as ProjectType,
     status: "Anfrage" as ProjectStatus,
     priority: "Normal" as ProjectPriority,
     deadline: "",
@@ -37,6 +45,8 @@ export default function ProjectForm({ onCreate }: Props) {
     setFormData({
       title: "",
       customer: "",
+      customerId: "",
+      type: "Firmenwebseite",
       status: "Anfrage",
       priority: "Normal",
       deadline: "",
@@ -62,6 +72,19 @@ export default function ProjectForm({ onCreate }: Props) {
           placeholder="Kunde"
           className="rounded-xl border border-neutral-800 bg-neutral-950 px-4 py-3"
         />
+
+        <select
+          value={formData.type}
+          onChange={(e) => update("type", e.target.value as ProjectType)}
+          className="rounded-xl border border-neutral-800 bg-neutral-950 px-4 py-3"
+        >
+          <option>Firmenwebseite</option>
+          <option>Landingpage</option>
+          <option>Onlineshop</option>
+          <option>Mitgliederportal</option>
+          <option>Academy</option>
+          <option>Blog</option>
+        </select>
 
         <select
           value={formData.status}
