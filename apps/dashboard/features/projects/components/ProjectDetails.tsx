@@ -151,7 +151,7 @@ export default function ProjectDetails({ project, onToggleTask }: Props) {
         </div>
       </div>
 
-      <ProjectModuleWorkspace module={selectedModule} />
+      <ProjectModuleWorkspace project={project} module={selectedModule} />
 
       <ProjectPromptGenerator project={project} />
 
