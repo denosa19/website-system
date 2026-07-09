@@ -15,6 +15,7 @@ export default function ProjectsHome() {
     createProject,
     deleteProject,
     updateProjectProgress,
+    updateProjectStatus,
   } = useProjects();
 
   return (
@@ -44,6 +45,7 @@ export default function ProjectsHome() {
           projects={filteredProjects}
           onDeleteProject={deleteProject}
           onUpdateProgress={updateProjectProgress}
+          onUpdateStatus={updateProjectStatus}
         />
       </div>
     </section>

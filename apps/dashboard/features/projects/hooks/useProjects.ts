@@ -75,6 +75,14 @@ export function useProjects() {
     );
   }
 
+  function updateProjectStatus(projectId: string, status: ProjectStatus) {
+    setProjects((current) =>
+      current.map((project) =>
+        project.id === projectId ? { ...project, status } : project
+      )
+    );
+  }
+
   return {
     filteredProjects,
     search,
@@ -84,5 +92,6 @@ export function useProjects() {
     createProject,
     deleteProject,
     updateProjectProgress,
+    updateProjectStatus,
   };
 }
