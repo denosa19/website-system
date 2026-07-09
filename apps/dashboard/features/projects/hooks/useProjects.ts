@@ -59,6 +59,12 @@ export function useProjects() {
     setProjects((current) => [newProject, ...current]);
   }
 
+  function deleteProject(projectId: string) {
+    setProjects((current) =>
+      current.filter((project) => project.id !== projectId)
+    );
+  }
+
   return {
     projects,
     filteredProjects,
@@ -67,5 +73,6 @@ export function useProjects() {
     statusFilter,
     setStatusFilter,
     createProject,
+    deleteProject,
   };
 }

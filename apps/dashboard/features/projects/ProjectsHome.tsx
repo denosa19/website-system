@@ -13,6 +13,7 @@ export default function ProjectsHome() {
     statusFilter,
     setStatusFilter,
     createProject,
+    deleteProject,
   } = useProjects();
 
   return (
@@ -38,7 +39,10 @@ export default function ProjectsHome() {
       </div>
 
       <div className="mt-8">
-        <ProjectTable projects={filteredProjects} />
+        <ProjectTable
+          projects={filteredProjects}
+          onDeleteProject={deleteProject}
+        />
       </div>
     </section>
   );
