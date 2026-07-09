@@ -8,6 +8,12 @@ export type ProjectStatus =
 
 export type ProjectPriority = "Niedrig" | "Normal" | "Hoch";
 
+export type ProjectTask = {
+  id: string;
+  title: string;
+  completed: boolean;
+};
+
 export type Project = {
   id: string;
   title: string;
@@ -17,4 +23,5 @@ export type Project = {
   progress: number;
   deadline: string;
   owner: string;
+  tasks: ProjectTask[];
 };

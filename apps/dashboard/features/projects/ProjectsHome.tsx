@@ -29,6 +29,7 @@ export default function ProjectsHome() {
     updateProjectProgress,
     updateProjectStatus,
     updateProjectPriority,
+    toggleProjectTask,
   } = useProjects();
 
   const selectedProject = useMemo(
@@ -125,7 +126,10 @@ export default function ProjectsHome() {
           )}
         </div>
 
-        <ProjectDetails project={selectedProject} />
+        <ProjectDetails
+          project={selectedProject}
+          onToggleTask={toggleProjectTask}
+        />
       </div>
     </section>
   );

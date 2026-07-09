@@ -19,6 +19,36 @@ type CreateProjectData = {
 
 type ProjectStatusFilter = "Alle" | ProjectStatus;
 
+function createDefaultTasks(projectId: string) {
+  return [
+    {
+      id: `${projectId}_task_001`,
+      title: "Kundendaten prüfen",
+      completed: false,
+    },
+    {
+      id: `${projectId}_task_002`,
+      title: "AI Studio Prompt erstellen",
+      completed: false,
+    },
+    {
+      id: `${projectId}_task_003`,
+      title: "Website prüfen",
+      completed: false,
+    },
+    {
+      id: `${projectId}_task_004`,
+      title: "SEO Grundcheck",
+      completed: false,
+    },
+    {
+      id: `${projectId}_task_005`,
+      title: "Go-Live vorbereiten",
+      completed: false,
+    },
+  ];
+}
+
 export function useProjects() {
   const [projects, setProjects] = useState<Project[]>(initialProjects);
   const [search, setSearch] = useState("");
@@ -45,8 +75,10 @@ export function useProjects() {
       return;
     }
 
+    const id = `proj_${Date.now()}`;
+
     const newProject: Project = {
-      id: `proj_${Date.now()}`,
+      id,
       title: data.title,
       customer: data.customer,
       status: data.status,
@@ -54,6 +86,7 @@ export function useProjects() {
       progress: 0,
       deadline: data.deadline,
       owner: data.owner || "Dennis",
+      tasks: createDefaultTasks(id),
     };
 
     setProjects((current) => [newProject, ...current]);
@@ -94,6 +127,23 @@ export function useProjects() {
     );
   }
 
+  function toggleProjectTask(projectId: string, taskId: string) {
+    setProjects((current) =>
+      current.map((project) =>
+        project.id === projectId
+          ? {
+              ...project,
+              tasks: project.tasks.map((task) =>
+                task.id === taskId
+                  ? { ...task, completed: !task.completed }
+                  : task
+              ),
+            }
+          : project
+      )
+    );
+  }
+
   return {
     filteredProjects,
     search,
@@ -105,5 +155,6 @@ export function useProjects() {
     updateProjectProgress,
     updateProjectStatus,
     updateProjectPriority,
+    toggleProjectTask,
   };
 }
