@@ -1,8 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { projects as initialProjects } from "../../../data/projects";
-import type { Project, ProjectPriority, ProjectStatus } from "../../../types/project";
+import type {
+  Project,
+  ProjectPriority,
+  ProjectStatus,
+} from "../../../types/project";
 
 type CreateProjectData = {
   title: string;
@@ -13,8 +17,27 @@ type CreateProjectData = {
   owner: string;
 };
 
+type ProjectStatusFilter = "Alle" | ProjectStatus;
+
 export function useProjects() {
   const [projects, setProjects] = useState<Project[]>(initialProjects);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] =
+    useState<ProjectStatusFilter>("Alle");
+
+  const filteredProjects = useMemo(() => {
+    return projects.filter((project) => {
+      const matchesSearch =
+        project.title.toLowerCase().includes(search.toLowerCase()) ||
+        project.customer.toLowerCase().includes(search.toLowerCase()) ||
+        project.owner.toLowerCase().includes(search.toLowerCase());
+
+      const matchesStatus =
+        statusFilter === "Alle" || project.status === statusFilter;
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [projects, search, statusFilter]);
 
   function createProject(data: CreateProjectData) {
     if (!data.title || !data.customer) {
@@ -38,6 +61,11 @@ export function useProjects() {
 
   return {
     projects,
+    filteredProjects,
+    search,
+    setSearch,
+    statusFilter,
+    setStatusFilter,
     createProject,
   };
 }

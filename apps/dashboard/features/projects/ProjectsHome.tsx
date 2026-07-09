@@ -1,11 +1,19 @@
 "use client";
 
+import ProjectFilters from "./components/ProjectFilters";
 import ProjectForm from "./components/ProjectForm";
 import ProjectTable from "./components/ProjectTable";
 import { useProjects } from "./hooks/useProjects";
 
 export default function ProjectsHome() {
-  const { projects, createProject } = useProjects();
+  const {
+    filteredProjects,
+    search,
+    setSearch,
+    statusFilter,
+    setStatusFilter,
+    createProject,
+  } = useProjects();
 
   return (
     <section>
@@ -21,7 +29,16 @@ export default function ProjectsHome() {
       </div>
 
       <div className="mt-8">
-        <ProjectTable projects={projects} />
+        <ProjectFilters
+          search={search}
+          statusFilter={statusFilter}
+          onSearchChange={setSearch}
+          onStatusChange={setStatusFilter}
+        />
+      </div>
+
+      <div className="mt-8">
+        <ProjectTable projects={filteredProjects} />
       </div>
     </section>
   );
