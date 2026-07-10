@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { defaultModules } from "../../../data/defaultModules";
 import { projectTemplates } from "../../../data/projectTemplates";
 import { projects as initialProjects } from "../../../data/projects";
 import type {
@@ -39,10 +40,12 @@ export function useProjects() {
 
   const filteredProjects = useMemo(() => {
     return projects.filter((project) => {
+      const normalizedSearch = search.toLowerCase();
+
       const matchesSearch =
-        project.title.toLowerCase().includes(search.toLowerCase()) ||
-        project.customer.toLowerCase().includes(search.toLowerCase()) ||
-        project.owner.toLowerCase().includes(search.toLowerCase());
+        project.title.toLowerCase().includes(normalizedSearch) ||
+        project.customer.toLowerCase().includes(normalizedSearch) ||
+        project.owner.toLowerCase().includes(normalizedSearch);
 
       const matchesStatus =
         statusFilter === "Alle" || project.status === statusFilter;
@@ -71,6 +74,16 @@ export function useProjects() {
       deadline: data.deadline,
       owner: data.owner || "Dennis",
       tasks: createTasksFromTemplate(id, data.type),
+      modules: structuredClone(defaultModules),
+      seo: {
+        mainKeyword: "",
+        secondaryKeywords: [],
+        metaTitle: "",
+        metaDescription: "",
+        h1: "",
+        robots: false,
+        sitemap: false,
+      },
     };
 
     setProjects((current) => [newProject, ...current]);
@@ -83,10 +96,12 @@ export function useProjects() {
   }
 
   function updateProjectProgress(projectId: string, progress: number) {
+    const safeProgress = Math.min(100, Math.max(0, progress));
+
     setProjects((current) =>
       current.map((project) =>
         project.id === projectId
-          ? { ...project, progress: Math.min(100, Math.max(0, progress)) }
+          ? { ...project, progress: safeProgress }
           : project
       )
     );
@@ -100,7 +115,10 @@ export function useProjects() {
     );
   }
 
-  function updateProjectPriority(projectId: string, priority: ProjectPriority) {
+  function updateProjectPriority(
+    projectId: string,
+    priority: ProjectPriority
+  ) {
     setProjects((current) =>
       current.map((project) =>
         project.id === projectId ? { ...project, priority } : project

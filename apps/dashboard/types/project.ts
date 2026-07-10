@@ -1,4 +1,5 @@
 import type { ProjectModule } from "./module";
+import type { SeoData } from "./seo";
 
 export type ProjectStatus =
   | "Anfrage"
@@ -37,4 +38,5 @@ export type Project = {
   owner: string;
   tasks: ProjectTask[];
   modules: ProjectModule[];
+  seo: SeoData;
 };

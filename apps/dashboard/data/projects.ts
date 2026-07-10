@@ -1,5 +1,5 @@
-import { defaultModules } from "./defaultModules";
 import type { Project } from "../types/project";
+import { defaultModules } from "./defaultModules";
 
 export const projects: Project[] = [
   {
@@ -41,6 +41,15 @@ export const projects: Project[] = [
       },
     ],
     modules: structuredClone(defaultModules),
+    seo: {
+      mainKeyword: "",
+      secondaryKeywords: [],
+      metaTitle: "",
+      metaDescription: "",
+      h1: "",
+      robots: false,
+      sitemap: false,
+    },
   },
   {
     id: "proj_002",
@@ -71,5 +80,14 @@ export const projects: Project[] = [
       },
     ],
     modules: structuredClone(defaultModules),
+    seo: {
+      mainKeyword: "",
+      secondaryKeywords: [],
+      metaTitle: "",
+      metaDescription: "",
+      h1: "",
+      robots: false,
+      sitemap: false,
+    },
   },
 ];
