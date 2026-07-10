@@ -1,84 +1,71 @@
-
-## 4. `00_docs/ROADMAP.md`
-
-```md
 # Roadmap
 
 ## Grundsatz
 
-Die Roadmap beschreibt die geplante Weiterentwicklung der internen Agentur-Software.
+Diese Roadmap beschreibt die geplante Entwicklung der Agentur-Software.
 
-Die Reihenfolge einzelner Blöcke wird ausschließlich über `NEXT_BLOCK.md` verbindlich festgelegt.
+Die verbindliche aktuelle Aufgabe steht immer in `NEXT_BLOCK.md`.
+
+---
 
 ## Bereits umgesetzt
-
-- Dashboard-Grundstruktur
-- Kundenverwaltung
-- Projektverwaltung
-- Aufgabenverwaltung
-- SEO-Datenmodell
-- SEO Workspace
-- SEO Agent zur Prompt-Erstellung und zum Export
-
-## Geplante Module
-
-### Kernverwaltung
 
 - Dashboard
 - Kunden
 - Projekte
 - Aufgaben
-- Leads
+- SEO Workspace
+- SEO Agent
+
+---
+
+## Geplante Module
+
+### Verwaltung
+
+- Dashboard
+- Kunden
+- Projekte
+- Aufgaben
 - CRM
+- Leads
 
 ### Vertrieb
 
 - Angebote
 - Rechnungen
 - Verträge
-- Verkaufsprozesse
 
-### SEO und Marketing
+### SEO
 
 - SEO Workspace
-- SEO-Analysen
-- SEO-Checklisten
-- Content-Planung
-- Prompt-Erstellung
-- spätere Automatisierungen
-
-### Finanzen
-
-- Einnahmen
-- Ausgaben
-- Rechnungsstatus
-- Kennzahlen
-- Finanzübersicht
+- SEO Agent
+- SEO Checklisten
+- Contentplanung
 
 ### Dokumente
 
 - Dokumentenverwaltung
 - Vorlagen
-- Kundenunterlagen
-- Projektdokumentation
 
-### KI und Automatisierung
+### Finanzen
 
-- KI-Assistenten
-- wiederverwendbare Prompts
+- Einnahmen
+- Ausgaben
+- Kennzahlen
+
+### KI
+
+- KI-Agenten
 - Automatisierungen
 - Wissensdatenbank
-- Agenten-Workflows
 
 ### Organisation
 
 - Mitarbeiter
 - Rollen
-- Berechtigungen
 - Einstellungen
 
-## Wichtig
+---
 
-Nicht alle Roadmap-Punkte sind bereits technisch spezifiziert.
-
-Neue Module werden erst umgesetzt, wenn sie als konkreter Block in `NEXT_BLOCK.md` definiert wurden.
+Neue Module werden ausschließlich Block für Block umgesetzt.

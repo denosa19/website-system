@@ -2,30 +2,27 @@
 
 ## Projektbasis
 
-- Monorepo mit `apps/dashboard` und `apps/starter` aufgebaut
-- Next.js, TypeScript, Tailwind CSS und App Router eingerichtet
-- wiederverwendbare Komponentenstruktur erstellt
+- Monorepo erstellt
+- Dashboard aufgebaut
+- Starter-App erstellt
+- Wiederverwendbare Komponentenstruktur eingeführt
 
-## Frühere Entwicklungsblöcke
+---
 
-Die Blöcke 1 bis 24 wurden im archivierten Entwicklungschat umgesetzt.
+## Blöcke 1–24
 
-Die vollständigen Einzeldefinitionen sind aktuell noch nicht in dieser Datei dokumentiert.
+Im archivierten Entwicklungschat umgesetzt.
 
-Bekannte umgesetzte Bereiche:
+Bekannte Bereiche:
 
 - Dashboard
 - Kundenverwaltung
 - Projektverwaltung
-- Kundendetails
-- Projektdetails
 - Aufgabenverwaltung
-- Status
-- Prioritäten
-- Fortschritt
-- Deadlines
-- wiederverwendbare UI-Komponenten
+- Komponentenstruktur
 - Datenmodelle
+
+---
 
 ## Block 25
 
@@ -33,14 +30,22 @@ Status: Abgeschlossen
 
 Umgesetzt:
 
-- SEO-Datenmodell
+- SEO Datenmodell
 - SEO Workspace
-- Anzeige der SEO-Daten
 - SEO Agent
-- Erstellung eines SEO-Prompts
-- Export des SEO-Prompts
+- SEO Prompt
+- SEO Export
 
 Commit:
 
-```text
 feat: add seo workspace
+
+---
+
+## Block 26
+
+Status:
+
+Noch nicht begonnen.
+
+Die genaue Definition wird aus dem archivierten Entwicklungschat übernommen.

@@ -1,7 +1,3 @@
-
-## 3. `00_docs/PROJECT_STATUS.md`
-
-```md
 # Project Status
 
 ## Repository
@@ -9,56 +5,77 @@
 - Repository: `denosa19/website-system`
 - Branch: `main`
 
+---
+
 ## Aktueller Stand
 
 Die Agentur-Software ist als Monorepo aufgebaut.
 
-Bekannte Anwendungen:
+### Anwendungen
 
-- `apps/dashboard`
-- `apps/starter`
+- apps/dashboard
+- apps/starter
 
-## Fertig oder vorhanden
+---
+
+## Bereits umgesetzt
 
 ### Grundlage
 
-- Monorepo-Struktur
+- Monorepo
 - Next.js
 - TypeScript
-- Tailwind CSS
+- Tailwind
 - App Router
-- GitHub-Anbindung
-- grundlegende Komponentenstruktur
+- GitHub
+- Vercel
 
 ### Dashboard
 
-- Dashboard-Grundstruktur
+- Dashboard
 - Kundenübersicht
 - Kundendetails
 - Projektübersicht
 - Projektdetails
 - Aufgabenverwaltung
-- Statusdarstellung
 - Prioritäten
-- Fortschritt
+- Status
 - Deadlines
+- Fortschritt
 
 ### Datenmodelle
 
-- Kundendatenmodell
-- Projektdatenmodell
-- Aufgaben innerhalb von Projekten
-- SEO-Datenmodell
+- Kunden
+- Projekte
+- Aufgaben
+- SEO
 
 ### SEO
 
-- SEO Workspace vorhanden
-- SEO-Daten werden angezeigt
-- SEO Agent vorhanden
-- SEO-Prompt kann erstellt werden
-- SEO-Prompt kann exportiert werden
+- SEO Workspace
+- SEO Agent
+- SEO Prompt erstellen
+- SEO Prompt exportieren
 
-## Letzter bekannter Commit
+---
 
-```text
+## Letzter Commit
+
 feat: add seo workspace
+
+---
+
+## Aktueller Block
+
+Block 25 abgeschlossen.
+
+Block 26 noch nicht begonnen.
+
+Die Definition von Block 26 muss aus dem archivierten Entwicklungschat übernommen werden.
+
+---
+
+## Offene Punkte
+
+- Block 26 dokumentieren
+- Dokumentation nach jedem Block aktualisieren
