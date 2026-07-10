@@ -1,11 +1,19 @@
-# Next Block
+
+## Ausgangspunkt
+
+Der aktuelle Projektstand entspricht dem abgeschlossenen Block 25.
+
+Alle weiteren Entwicklungsblöcke bauen auf diesem Stand auf.
+
+---
 
 ## Block 26
 
-Status
+Status:
 
-Definition aus dem archivierten Entwicklungschat ausstehend.
+Bereit zur Definition.
 
+Dieser Block wird der erste vollständig im Repository dokumentierte Entwicklungsblock.
 ---
 
 ## Aktueller technischer Stand

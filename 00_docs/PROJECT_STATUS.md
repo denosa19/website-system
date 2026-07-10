@@ -65,13 +65,13 @@ feat: add seo workspace
 
 ---
 
-## Aktueller Block
+## Aktueller Entwicklungsstand
 
-Block 25 abgeschlossen.
+Die Entwicklung bis einschließlich Block 25 gilt als vollständig abgeschlossen und verifiziert.
 
-Block 26 noch nicht begonnen.
+Block 25 bildet den offiziellen Ausgangspunkt für alle weiteren Entwicklungsblöcke.
 
-Die Definition von Block 26 muss aus dem archivierten Entwicklungschat übernommen werden.
+Ab Block 26 wird die Entwicklung vollständig über dieses Repository und die Dokumentation in `00_docs` nachverfolgt.
 
 ---
 

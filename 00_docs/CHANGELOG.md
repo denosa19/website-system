@@ -42,10 +42,10 @@ feat: add seo workspace
 
 ---
 
-## Block 26
+## Entwicklungsbasis
 
-Status:
+Block 25 bildet den dokumentierten Referenzstand des Projekts.
 
-Noch nicht begonnen.
+Alle folgenden Blöcke werden vollständig im Repository dokumentiert und versioniert.
 
-Die genaue Definition wird aus dem archivierten Entwicklungschat übernommen.
+Historische Blöcke 1–25 bleiben Bestandteil der Projekthistorie, werden jedoch nicht nachträglich rekonstruiert.
