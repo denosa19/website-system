@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { SeoData } from "../../../types/seo";
+import GoogleSnippetPreview from "./GoogleSnippetPreview";
 import SeoScore from "./SeoScore";
 
 type Props = {
@@ -30,6 +31,9 @@ export default function SeoWorkspace({
   const [secondaryKeywords, setSecondaryKeywords] = useState(
     keywordsToText(seo.secondaryKeywords)
   );
+  const [previewDomain, setPreviewDomain] = useState(
+    "www.deine-domain.de"
+  );
   const [saved, setSaved] = useState(false);
 
   const currentSeoData = useMemo<SeoData>(
@@ -42,7 +46,10 @@ export default function SeoWorkspace({
 
   useEffect(() => {
     setFormData(seo);
-    setSecondaryKeywords(keywordsToText(seo.secondaryKeywords));
+    setSecondaryKeywords(
+      keywordsToText(seo.secondaryKeywords)
+    );
+    setPreviewDomain("www.deine-domain.de");
     setSaved(false);
   }, [projectId, seo]);
 
@@ -71,6 +78,12 @@ export default function SeoWorkspace({
     <div className="space-y-6">
       <SeoScore seo={currentSeoData} />
 
+      <GoogleSnippetPreview
+        seo={currentSeoData}
+        domain={previewDomain}
+        onDomainChange={setPreviewDomain}
+      />
+
       <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
@@ -78,10 +91,13 @@ export default function SeoWorkspace({
               Projekt-Arbeitsbereich
             </p>
 
-            <h3 className="mt-1 text-xl font-bold">SEO Workspace</h3>
+            <h3 className="mt-1 text-xl font-bold">
+              SEO Workspace
+            </h3>
 
             <p className="mt-2 text-sm text-neutral-400">
-              Speichere Keywords und Metadaten direkt im Projekt.
+              Speichere Keywords und Metadaten direkt im
+              Projekt.
             </p>
           </div>
 
@@ -110,7 +126,10 @@ export default function SeoWorkspace({
               type="text"
               value={formData.mainKeyword}
               onChange={(event) =>
-                updateField("mainKeyword", event.target.value)
+                updateField(
+                  "mainKeyword",
+                  event.target.value
+                )
               }
               placeholder="Zum Beispiel: Gebäudetechnik Mannheim"
               className="rounded-xl border border-neutral-800 bg-neutral-950 px-4 py-3 text-white outline-none transition placeholder:text-neutral-600 focus:border-neutral-600"
@@ -195,7 +214,10 @@ export default function SeoWorkspace({
               maxLength={160}
               rows={4}
               onChange={(event) =>
-                updateField("metaDescription", event.target.value)
+                updateField(
+                  "metaDescription",
+                  event.target.value
+                )
               }
               placeholder="Kurze Beschreibung für die Google-Suchergebnisse"
               className="resize-y rounded-xl border border-neutral-800 bg-neutral-950 px-4 py-3 text-white outline-none transition placeholder:text-neutral-600 focus:border-neutral-600"
@@ -238,7 +260,10 @@ export default function SeoWorkspace({
                 type="checkbox"
                 checked={formData.robots}
                 onChange={(event) =>
-                  updateField("robots", event.target.checked)
+                  updateField(
+                    "robots",
+                    event.target.checked
+                  )
                 }
                 className="h-5 w-5"
               />
@@ -259,7 +284,10 @@ export default function SeoWorkspace({
                 type="checkbox"
                 checked={formData.sitemap}
                 onChange={(event) =>
-                  updateField("sitemap", event.target.checked)
+                  updateField(
+                    "sitemap",
+                    event.target.checked
+                  )
                 }
                 className="h-5 w-5"
               />
