@@ -1,6 +1,4 @@
 
-`00_docs/CHANGELOG.md` — komplett ersetzen
-
 ```md
 # Changelog
 

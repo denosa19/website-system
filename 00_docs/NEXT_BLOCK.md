@@ -1,6 +1,4 @@
 
-`00_docs/NEXT_BLOCK.md` — komplett ersetzen
-
 ```md
 # Next Block
 
