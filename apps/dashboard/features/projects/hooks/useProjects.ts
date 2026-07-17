@@ -10,6 +10,7 @@ import type {
   ProjectStatus,
   ProjectType,
 } from "../../../types/project";
+import type { SeoData } from "../../../types/seo";
 
 type CreateProjectData = {
   title: string;
@@ -32,6 +33,18 @@ function createTasksFromTemplate(projectId: string, type: ProjectType) {
   }));
 }
 
+function createEmptySeoData(): SeoData {
+  return {
+    mainKeyword: "",
+    secondaryKeywords: [],
+    metaTitle: "",
+    metaDescription: "",
+    h1: "",
+    robots: false,
+    sitemap: false,
+  };
+}
+
 export function useProjects() {
   const [projects, setProjects] = useState<Project[]>(initialProjects);
   const [search, setSearch] = useState("");
@@ -40,7 +53,7 @@ export function useProjects() {
 
   const filteredProjects = useMemo(() => {
     return projects.filter((project) => {
-      const normalizedSearch = search.toLowerCase();
+      const normalizedSearch = search.trim().toLowerCase();
 
       const matchesSearch =
         project.title.toLowerCase().includes(normalizedSearch) ||
@@ -55,7 +68,7 @@ export function useProjects() {
   }, [projects, search, statusFilter]);
 
   function createProject(data: CreateProjectData) {
-    if (!data.title || !data.customer) {
+    if (!data.title.trim() || !data.customer.trim()) {
       alert("Bitte mindestens Projektname und Kunde eintragen.");
       return;
     }
@@ -64,26 +77,18 @@ export function useProjects() {
 
     const newProject: Project = {
       id,
-      title: data.title,
+      title: data.title.trim(),
       customerId: data.customerId || `manual_${Date.now()}`,
-      customer: data.customer,
+      customer: data.customer.trim(),
       type: data.type,
       status: data.status,
       priority: data.priority,
       progress: 0,
       deadline: data.deadline,
-      owner: data.owner || "Dennis",
+      owner: data.owner.trim() || "Dennis",
       tasks: createTasksFromTemplate(id, data.type),
       modules: structuredClone(defaultModules),
-      seo: {
-        mainKeyword: "",
-        secondaryKeywords: [],
-        metaTitle: "",
-        metaDescription: "",
-        h1: "",
-        robots: false,
-        sitemap: false,
-      },
+      seo: createEmptySeoData(),
     };
 
     setProjects((current) => [newProject, ...current]);
@@ -101,16 +106,27 @@ export function useProjects() {
     setProjects((current) =>
       current.map((project) =>
         project.id === projectId
-          ? { ...project, progress: safeProgress }
+          ? {
+              ...project,
+              progress: safeProgress,
+            }
           : project
       )
     );
   }
 
-  function updateProjectStatus(projectId: string, status: ProjectStatus) {
+  function updateProjectStatus(
+    projectId: string,
+    status: ProjectStatus
+  ) {
     setProjects((current) =>
       current.map((project) =>
-        project.id === projectId ? { ...project, status } : project
+        project.id === projectId
+          ? {
+              ...project,
+              status,
+            }
+          : project
       )
     );
   }
@@ -121,7 +137,12 @@ export function useProjects() {
   ) {
     setProjects((current) =>
       current.map((project) =>
-        project.id === projectId ? { ...project, priority } : project
+        project.id === projectId
+          ? {
+              ...project,
+              priority,
+            }
+          : project
       )
     );
   }
@@ -134,9 +155,34 @@ export function useProjects() {
               ...project,
               tasks: project.tasks.map((task) =>
                 task.id === taskId
-                  ? { ...task, completed: !task.completed }
+                  ? {
+                      ...task,
+                      completed: !task.completed,
+                    }
                   : task
               ),
+            }
+          : project
+      )
+    );
+  }
+
+  function updateProjectSeo(projectId: string, seo: SeoData) {
+    setProjects((current) =>
+      current.map((project) =>
+        project.id === projectId
+          ? {
+              ...project,
+              seo: {
+                ...seo,
+                mainKeyword: seo.mainKeyword.trim(),
+                secondaryKeywords: seo.secondaryKeywords
+                  .map((keyword) => keyword.trim())
+                  .filter(Boolean),
+                metaTitle: seo.metaTitle.trim(),
+                metaDescription: seo.metaDescription.trim(),
+                h1: seo.h1.trim(),
+              },
             }
           : project
       )
@@ -155,5 +201,6 @@ export function useProjects() {
     updateProjectStatus,
     updateProjectPriority,
     toggleProjectTask,
+    updateProjectSeo,
   };
 }

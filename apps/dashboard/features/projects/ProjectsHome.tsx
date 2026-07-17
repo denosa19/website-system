@@ -30,12 +30,14 @@ export default function ProjectsHome() {
     updateProjectStatus,
     updateProjectPriority,
     toggleProjectTask,
+    updateProjectSeo,
   } = useProjects();
 
   const selectedProject = useMemo(
     () =>
-      filteredProjects.find((project) => project.id === selectedProjectId) ??
-      null,
+      filteredProjects.find(
+        (project) => project.id === selectedProjectId
+      ) ?? null,
     [filteredProjects, selectedProjectId]
   );
 
@@ -52,6 +54,7 @@ export default function ProjectsHome() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-4xl font-bold">Projekte</h1>
+
           <p className="mt-3 text-neutral-400">
             Verwalte Website-Projekte, Deadlines, Status und Fortschritt.
           </p>
@@ -59,6 +62,7 @@ export default function ProjectsHome() {
 
         <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-1">
           <button
+            type="button"
             onClick={() => setViewMode("table")}
             className={`rounded-lg px-4 py-2 text-sm ${
               viewMode === "table"
@@ -70,6 +74,7 @@ export default function ProjectsHome() {
           </button>
 
           <button
+            type="button"
             onClick={() => setViewMode("cards")}
             className={`rounded-lg px-4 py-2 text-sm ${
               viewMode === "cards"
@@ -129,6 +134,7 @@ export default function ProjectsHome() {
         <ProjectDetails
           project={selectedProject}
           onToggleTask={toggleProjectTask}
+          onUpdateSeo={updateProjectSeo}
         />
       </div>
     </section>

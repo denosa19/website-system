@@ -2,6 +2,7 @@
 
 import type { ProjectModule } from "../../../types/module";
 import type { Project } from "../../../types/project";
+import type { SeoData } from "../../../types/seo";
 import ModuleDashboard from "./ModuleDashboard";
 import ModulePromptGenerator from "./ModulePromptGenerator";
 import SeoAgent from "./SeoAgent";
@@ -10,11 +11,13 @@ import SeoWorkspace from "./SeoWorkspace";
 type Props = {
   project: Project;
   module: ProjectModule | null;
+  onUpdateSeo: (projectId: string, seo: SeoData) => void;
 };
 
 export default function ProjectModuleWorkspace({
   project,
   module,
+  onUpdateSeo,
 }: Props) {
   if (!module) {
     return (
@@ -25,7 +28,8 @@ export default function ProjectModuleWorkspace({
   }
 
   const showSeoWorkspace =
-    module.id === "seo" || module.title.toLowerCase().includes("seo");
+    module.id === "seo" ||
+    module.title.toLowerCase().includes("seo");
 
   return (
     <div className="space-y-6">
@@ -34,14 +38,21 @@ export default function ProjectModuleWorkspace({
 
         <h2 className="mt-2 text-3xl font-bold">{module.title}</h2>
 
-        <p className="mt-3 text-neutral-400">{module.description}</p>
+        <p className="mt-3 text-neutral-400">
+          {module.description}
+        </p>
       </div>
 
       <ModuleDashboard project={project} module={module} />
 
       {showSeoWorkspace && (
         <>
-          <SeoWorkspace seo={project.seo} />
+          <SeoWorkspace
+            projectId={project.id}
+            seo={project.seo}
+            onSave={onUpdateSeo}
+          />
+
           <SeoAgent project={project} module={module} />
         </>
       )}

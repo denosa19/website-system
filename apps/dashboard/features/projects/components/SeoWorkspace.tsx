@@ -1,63 +1,240 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import type { SeoData } from "../../../types/seo";
 
 type Props = {
+  projectId: string;
   seo: SeoData;
+  onSave: (projectId: string, seo: SeoData) => void;
 };
 
-export default function SeoWorkspace({ seo }: Props) {
+function keywordsToText(keywords: string[]) {
+  return keywords.join(", ");
+}
+
+function textToKeywords(value: string) {
+  return value
+    .split(",")
+    .map((keyword) => keyword.trim())
+    .filter(Boolean);
+}
+
+export default function SeoWorkspace({
+  projectId,
+  seo,
+  onSave,
+}: Props) {
+  const [formData, setFormData] = useState<SeoData>(seo);
+  const [secondaryKeywords, setSecondaryKeywords] = useState(
+    keywordsToText(seo.secondaryKeywords)
+  );
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    setFormData(seo);
+    setSecondaryKeywords(keywordsToText(seo.secondaryKeywords));
+    setSaved(false);
+  }, [projectId, seo]);
+
+  function updateField<Key extends keyof SeoData>(
+    field: Key,
+    value: SeoData[Key]
+  ) {
+    setFormData((current) => ({
+      ...current,
+      [field]: value,
+    }));
+
+    setSaved(false);
+  }
+
+  function handleSave() {
+    const updatedSeo: SeoData = {
+      ...formData,
+      secondaryKeywords: textToKeywords(secondaryKeywords),
+    };
+
+    onSave(projectId, updatedSeo);
+    setFormData(updatedSeo);
+    setSecondaryKeywords(
+      keywordsToText(updatedSeo.secondaryKeywords)
+    );
+    setSaved(true);
+  }
+
   return (
     <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
-
-      <h3 className="text-xl font-bold">
-        SEO Workspace
-      </h3>
-
-      <div className="mt-6 grid gap-4">
-
-        <div className="rounded-xl border border-neutral-800 bg-neutral-950 p-4">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
           <p className="text-sm text-neutral-500">
-            Hauptkeyword
+            Projekt-Arbeitsbereich
           </p>
 
-          <p className="mt-2">
-            {seo.mainKeyword || "Noch nicht erstellt"}
+          <h3 className="mt-1 text-xl font-bold">SEO Workspace</h3>
+
+          <p className="mt-2 text-sm text-neutral-400">
+            Speichere Keywords und Metadaten direkt im Projekt.
           </p>
         </div>
 
-        <div className="rounded-xl border border-neutral-800 bg-neutral-950 p-4">
-          <p className="text-sm text-neutral-500">
-            Meta Title
-          </p>
-
-          <p className="mt-2">
-            {seo.metaTitle || "Noch nicht erstellt"}
-          </p>
-        </div>
-
-        <div className="rounded-xl border border-neutral-800 bg-neutral-950 p-4">
-          <p className="text-sm text-neutral-500">
-            Meta Description
-          </p>
-
-          <p className="mt-2">
-            {seo.metaDescription || "Noch nicht erstellt"}
-          </p>
-        </div>
-
-        <div className="rounded-xl border border-neutral-800 bg-neutral-950 p-4">
-          <p className="text-sm text-neutral-500">
-            H1
-          </p>
-
-          <p className="mt-2">
-            {seo.h1 || "Noch nicht erstellt"}
-          </p>
-        </div>
-
+        <button
+          type="button"
+          onClick={handleSave}
+          className="rounded-xl bg-white px-5 py-2.5 font-semibold text-black transition hover:bg-neutral-200"
+        >
+          SEO-Daten speichern
+        </button>
       </div>
 
+      {saved && (
+        <div className="mt-5 rounded-xl border border-green-900 bg-green-950/40 px-4 py-3 text-sm text-green-300">
+          SEO-Daten wurden im Projekt gespeichert.
+        </div>
+      )}
+
+      <div className="mt-6 grid gap-5">
+        <label className="grid gap-2">
+          <span className="text-sm font-medium text-neutral-300">
+            Hauptkeyword
+          </span>
+
+          <input
+            type="text"
+            value={formData.mainKeyword}
+            onChange={(event) =>
+              updateField("mainKeyword", event.target.value)
+            }
+            placeholder="Zum Beispiel: Gebäudetechnik Mannheim"
+            className="rounded-xl border border-neutral-800 bg-neutral-950 px-4 py-3 text-white outline-none transition placeholder:text-neutral-600 focus:border-neutral-600"
+          />
+        </label>
+
+        <label className="grid gap-2">
+          <span className="text-sm font-medium text-neutral-300">
+            Nebenkeywords
+          </span>
+
+          <input
+            type="text"
+            value={secondaryKeywords}
+            onChange={(event) => {
+              setSecondaryKeywords(event.target.value);
+              setSaved(false);
+            }}
+            placeholder="Elektrotechnik, Gebäudeservice, Elektroinstallation"
+            className="rounded-xl border border-neutral-800 bg-neutral-950 px-4 py-3 text-white outline-none transition placeholder:text-neutral-600 focus:border-neutral-600"
+          />
+
+          <span className="text-xs text-neutral-500">
+            Mehrere Keywords mit Komma trennen.
+          </span>
+        </label>
+
+        <label className="grid gap-2">
+          <div className="flex items-center justify-between gap-4">
+            <span className="text-sm font-medium text-neutral-300">
+              Meta Title
+            </span>
+
+            <span className="text-xs text-neutral-500">
+              {formData.metaTitle.length}/60
+            </span>
+          </div>
+
+          <input
+            type="text"
+            value={formData.metaTitle}
+            maxLength={60}
+            onChange={(event) =>
+              updateField("metaTitle", event.target.value)
+            }
+            placeholder="Seitentitel für Google"
+            className="rounded-xl border border-neutral-800 bg-neutral-950 px-4 py-3 text-white outline-none transition placeholder:text-neutral-600 focus:border-neutral-600"
+          />
+        </label>
+
+        <label className="grid gap-2">
+          <div className="flex items-center justify-between gap-4">
+            <span className="text-sm font-medium text-neutral-300">
+              Meta Description
+            </span>
+
+            <span className="text-xs text-neutral-500">
+              {formData.metaDescription.length}/160
+            </span>
+          </div>
+
+          <textarea
+            value={formData.metaDescription}
+            maxLength={160}
+            rows={4}
+            onChange={(event) =>
+              updateField("metaDescription", event.target.value)
+            }
+            placeholder="Kurze Beschreibung für die Google-Suchergebnisse"
+            className="resize-y rounded-xl border border-neutral-800 bg-neutral-950 px-4 py-3 text-white outline-none transition placeholder:text-neutral-600 focus:border-neutral-600"
+          />
+        </label>
+
+        <label className="grid gap-2">
+          <span className="text-sm font-medium text-neutral-300">
+            H1-Überschrift
+          </span>
+
+          <input
+            type="text"
+            value={formData.h1}
+            onChange={(event) => updateField("h1", event.target.value)}
+            placeholder="Hauptüberschrift der Startseite"
+            className="rounded-xl border border-neutral-800 bg-neutral-950 px-4 py-3 text-white outline-none transition placeholder:text-neutral-600 focus:border-neutral-600"
+          />
+        </label>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <label className="flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-neutral-800 bg-neutral-950 p-4">
+            <div>
+              <p className="font-medium text-neutral-200">
+                Robots.txt
+              </p>
+
+              <p className="mt-1 text-sm text-neutral-500">
+                Datei wurde eingerichtet und geprüft.
+              </p>
+            </div>
+
+            <input
+              type="checkbox"
+              checked={formData.robots}
+              onChange={(event) =>
+                updateField("robots", event.target.checked)
+              }
+              className="h-5 w-5"
+            />
+          </label>
+
+          <label className="flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-neutral-800 bg-neutral-950 p-4">
+            <div>
+              <p className="font-medium text-neutral-200">
+                Sitemap
+              </p>
+
+              <p className="mt-1 text-sm text-neutral-500">
+                XML-Sitemap wurde eingerichtet und geprüft.
+              </p>
+            </div>
+
+            <input
+              type="checkbox"
+              checked={formData.sitemap}
+              onChange={(event) =>
+                updateField("sitemap", event.target.checked)
+              }
+              className="h-5 w-5"
+            />
+          </label>
+        </div>
+      </div>
     </div>
   );
 }

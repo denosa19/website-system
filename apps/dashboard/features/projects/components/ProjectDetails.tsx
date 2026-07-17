@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { Project } from "../../../types/project";
+import type { SeoData } from "../../../types/seo";
 import ProjectModuleWorkspace from "./ProjectModuleWorkspace";
 import ProjectPhaseTimeline from "./ProjectPhaseTimeline";
 import ProjectPromptGenerator from "./ProjectPromptGenerator";
@@ -10,16 +11,27 @@ import WebsiteWizard from "./WebsiteWizard";
 type Props = {
   project: Project | null;
   onToggleTask: (projectId: string, taskId: string) => void;
+  onUpdateSeo: (projectId: string, seo: SeoData) => void;
 };
 
-export default function ProjectDetails({ project, onToggleTask }: Props) {
-  const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null);
+export default function ProjectDetails({
+  project,
+  onToggleTask,
+  onUpdateSeo,
+}: Props) {
+  const [selectedModuleId, setSelectedModuleId] = useState<string | null>(
+    null
+  );
 
   const selectedModule = useMemo(() => {
-    if (!project) return null;
+    if (!project) {
+      return null;
+    }
 
     return (
-      project.modules.find((module) => module.id === selectedModuleId) ??
+      project.modules.find(
+        (module) => module.id === selectedModuleId
+      ) ??
       project.modules[0] ??
       null
     );
@@ -28,13 +40,15 @@ export default function ProjectDetails({ project, onToggleTask }: Props) {
   if (!project) {
     return (
       <div className="rounded-2xl border border-dashed border-neutral-800 p-8 text-neutral-400">
-        Wähle ein Projekt aus, um Details, Checkliste, Module und AI-Prompt zu
-        sehen.
+        Wähle ein Projekt aus, um Details, Checkliste, Module und
+        AI-Prompt zu sehen.
       </div>
     );
   }
 
-  const completedTasks = project.tasks.filter((task) => task.completed).length;
+  const completedTasks = project.tasks.filter(
+    (task) => task.completed
+  ).length;
 
   return (
     <div className="space-y-6">
@@ -83,6 +97,7 @@ export default function ProjectDetails({ project, onToggleTask }: Props) {
         <div className="mt-8">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-xl font-bold">Projekt-Checkliste</h3>
+
             <span className="text-sm text-neutral-400">
               {completedTasks}/{project.tasks.length} erledigt
             </span>
@@ -126,6 +141,7 @@ export default function ProjectDetails({ project, onToggleTask }: Props) {
 
             return (
               <button
+                type="button"
                 key={module.id}
                 onClick={() => setSelectedModuleId(module.id)}
                 className={`w-full rounded-xl border p-4 text-left transition ${
@@ -151,7 +167,11 @@ export default function ProjectDetails({ project, onToggleTask }: Props) {
         </div>
       </div>
 
-      <ProjectModuleWorkspace project={project} module={selectedModule} />
+      <ProjectModuleWorkspace
+        project={project}
+        module={selectedModule}
+        onUpdateSeo={onUpdateSeo}
+      />
 
       <ProjectPromptGenerator project={project} />
 
