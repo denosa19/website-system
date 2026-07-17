@@ -244,3 +244,4 @@ Noch nicht vorhanden:
 
 ```text
 feat: add seo workspace
+```
