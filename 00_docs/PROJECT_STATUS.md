@@ -46,9 +46,6 @@ Die Agentur-Software ist als Monorepo aufgebaut.
 ### Datenmodelle
 
 - Kunden
-
-`00_docs/PROJECT_STATUS.md` — komplett ersetzen
-
 ```md
 # Project Status
 

@@ -1,5 +1,3 @@
-
-```md
 # Next Block
 
 ## Ausgangspunkt
