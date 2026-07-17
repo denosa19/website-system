@@ -31,9 +31,6 @@ export default function SeoWorkspace({
   const [secondaryKeywords, setSecondaryKeywords] = useState(
     keywordsToText(seo.secondaryKeywords)
   );
-  const [previewDomain, setPreviewDomain] = useState(
-    "www.deine-domain.de"
-  );
   const [saved, setSaved] = useState(false);
 
   const currentSeoData = useMemo<SeoData>(
@@ -49,7 +46,6 @@ export default function SeoWorkspace({
     setSecondaryKeywords(
       keywordsToText(seo.secondaryKeywords)
     );
-    setPreviewDomain("www.deine-domain.de");
     setSaved(false);
   }, [projectId, seo]);
 
@@ -80,8 +76,10 @@ export default function SeoWorkspace({
 
       <GoogleSnippetPreview
         seo={currentSeoData}
-        domain={previewDomain}
-        onDomainChange={setPreviewDomain}
+        domain={currentSeoData.domain}
+        onDomainChange={(domain) =>
+          updateField("domain", domain)
+        }
       />
 
       <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
@@ -112,7 +110,7 @@ export default function SeoWorkspace({
 
         {saved && (
           <div className="mt-5 rounded-xl border border-green-900 bg-green-950/40 px-4 py-3 text-sm text-green-300">
-            SEO-Daten wurden im Projekt gespeichert.
+            SEO-Daten und Domain wurden im Projekt gespeichert.
           </div>
         )}
 

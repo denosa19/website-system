@@ -1,4 +1,5 @@
 export type SeoData = {
+  domain: string;
   mainKeyword: string;
   secondaryKeywords: string[];
   metaTitle: string;

@@ -123,7 +123,7 @@ export default function GoogleSnippetPreview({
 
       <label className="mt-6 grid gap-2">
         <span className="text-sm font-medium text-neutral-300">
-          Domain für die Vorschau
+          Projekt-Domain
         </span>
 
         <input
@@ -135,8 +135,8 @@ export default function GoogleSnippetPreview({
         />
 
         <span className="text-xs text-neutral-500">
-          Die Domain dient momentan nur der Vorschau und wird
-          noch nicht im Projekt gespeichert.
+          Die Domain wird zusammen mit den SEO-Daten dauerhaft
+          im Projekt gespeichert.
         </span>
       </label>
 

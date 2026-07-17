@@ -42,6 +42,7 @@ export const projects: Project[] = [
     ],
     modules: structuredClone(defaultModules),
     seo: {
+      domain: "adlergebaudetechnik.de",
       mainKeyword: "",
       secondaryKeywords: [],
       metaTitle: "",
@@ -81,6 +82,7 @@ export const projects: Project[] = [
     ],
     modules: structuredClone(defaultModules),
     seo: {
+      domain: "itouchacademy.com",
       mainKeyword: "",
       secondaryKeywords: [],
       metaTitle: "",

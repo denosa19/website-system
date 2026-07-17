@@ -35,6 +35,7 @@ function createTasksFromTemplate(projectId: string, type: ProjectType) {
 
 function createEmptySeoData(): SeoData {
   return {
+    domain: "",
     mainKeyword: "",
     secondaryKeywords: [],
     metaTitle: "",
@@ -43,6 +44,13 @@ function createEmptySeoData(): SeoData {
     robots: false,
     sitemap: false,
   };
+}
+
+function normalizeDomain(value: string) {
+  return value
+    .trim()
+    .replace(/^https?:\/\//i, "")
+    .replace(/\/+$/, "");
 }
 
 export function useProjects() {
@@ -175,6 +183,7 @@ export function useProjects() {
               ...project,
               seo: {
                 ...seo,
+                domain: normalizeDomain(seo.domain),
                 mainKeyword: seo.mainKeyword.trim(),
                 secondaryKeywords: seo.secondaryKeywords
                   .map((keyword) => keyword.trim())
