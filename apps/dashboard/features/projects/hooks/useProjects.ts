@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { defaultModules } from "../../../data/defaultModules";
 import { projectTemplates } from "../../../data/projectTemplates";
 import { projects as initialProjects } from "../../../data/projects";
@@ -26,8 +32,12 @@ type CreateProjectData = {
 type ProjectStatusFilter = "Alle" | ProjectStatus;
 
 const PROJECTS_STORAGE_KEY = "internet-firma-projects";
+const MAX_HISTORY_ENTRIES = 50;
 
-function createTasksFromTemplate(projectId: string, type: ProjectType) {
+function createTasksFromTemplate(
+  projectId: string,
+  type: ProjectType
+) {
   return projectTemplates[type].map((title, index) => ({
     id: `${projectId}_task_${index + 1}`,
     title,
@@ -55,8 +65,14 @@ function normalizeDomain(value: string) {
     .replace(/\/+$/, "");
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
+function isRecord(
+  value: unknown
+): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
+}
+
+function cloneProjects(projects: Project[]) {
+  return structuredClone(projects);
 }
 
 function migrateSeoData(value: unknown): SeoData {
@@ -75,7 +91,9 @@ function migrateSeoData(value: unknown): SeoData {
       typeof value.mainKeyword === "string"
         ? value.mainKeyword
         : fallback.mainKeyword,
-    secondaryKeywords: Array.isArray(value.secondaryKeywords)
+    secondaryKeywords: Array.isArray(
+      value.secondaryKeywords
+    )
       ? value.secondaryKeywords.filter(
           (keyword): keyword is string =>
             typeof keyword === "string"
@@ -132,7 +150,8 @@ function migrateProject(value: unknown): Project | null {
     customerId:
       typeof value.customerId === "string"
         ? value.customerId
-        : fallbackProject?.customerId ?? `manual_${value.id}`,
+        : fallbackProject?.customerId ??
+          `manual_${value.id}`,
     customer: value.customer,
     type: projectType,
     status:
@@ -188,44 +207,152 @@ function loadStoredProjects(): Project[] {
     );
 
     if (!storedValue) {
-      return initialProjects;
+      return cloneProjects(initialProjects);
     }
 
     const parsedValue: unknown = JSON.parse(storedValue);
 
     if (!Array.isArray(parsedValue)) {
-      return initialProjects;
+      return cloneProjects(initialProjects);
     }
 
     const migratedProjects = parsedValue
       .map(migrateProject)
-      .filter((project): project is Project => project !== null);
+      .filter(
+        (project): project is Project => project !== null
+      );
 
     return migratedProjects.length > 0
       ? migratedProjects
-      : initialProjects;
+      : cloneProjects(initialProjects);
   } catch (error) {
     console.error(
       "Gespeicherte Projekte konnten nicht geladen werden:",
       error
     );
 
-    return initialProjects;
+    return cloneProjects(initialProjects);
   }
 }
 
+function isEditableElement(target: EventTarget | null) {
+  if (!(target instanceof HTMLElement)) {
+    return false;
+  }
+
+  const tagName = target.tagName.toLowerCase();
+
+  return (
+    tagName === "input" ||
+    tagName === "textarea" ||
+    tagName === "select" ||
+    target.isContentEditable
+  );
+}
+
 export function useProjects() {
-  const [projects, setProjects] =
-    useState<Project[]>(initialProjects);
+  const [projects, setProjects] = useState<Project[]>(
+    cloneProjects(initialProjects)
+  );
   const [storageLoaded, setStorageLoaded] = useState(false);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] =
     useState<ProjectStatusFilter>("Alle");
+  const [canUndo, setCanUndo] = useState(false);
+  const [canRedo, setCanRedo] = useState(false);
+
+  const projectsRef = useRef<Project[]>(
+    cloneProjects(initialProjects)
+  );
+  const pastRef = useRef<Project[][]>([]);
+  const futureRef = useRef<Project[][]>([]);
+
+  const updateHistoryAvailability = useCallback(() => {
+    setCanUndo(pastRef.current.length > 0);
+    setCanRedo(futureRef.current.length > 0);
+  }, []);
+
+  const replaceProjects = useCallback(
+    (nextProjects: Project[]) => {
+      projectsRef.current = nextProjects;
+      setProjects(nextProjects);
+    },
+    []
+  );
+
+  const applyProjectChange = useCallback(
+    (
+      updater: (currentProjects: Project[]) => Project[]
+    ) => {
+      const currentProjects = projectsRef.current;
+      const nextProjects = updater(currentProjects);
+
+      if (nextProjects === currentProjects) {
+        return;
+      }
+
+      pastRef.current = [
+        ...pastRef.current,
+        cloneProjects(currentProjects),
+      ].slice(-MAX_HISTORY_ENTRIES);
+
+      futureRef.current = [];
+
+      replaceProjects(nextProjects);
+      updateHistoryAvailability();
+    },
+    [replaceProjects, updateHistoryAvailability]
+  );
+
+  const undo = useCallback(() => {
+    const previousProjects = pastRef.current.at(-1);
+
+    if (!previousProjects) {
+      return;
+    }
+
+    const currentProjects = projectsRef.current;
+
+    pastRef.current = pastRef.current.slice(0, -1);
+    futureRef.current = [
+      cloneProjects(currentProjects),
+      ...futureRef.current,
+    ].slice(0, MAX_HISTORY_ENTRIES);
+
+    replaceProjects(cloneProjects(previousProjects));
+    updateHistoryAvailability();
+  }, [replaceProjects, updateHistoryAvailability]);
+
+  const redo = useCallback(() => {
+    const nextProjects = futureRef.current[0];
+
+    if (!nextProjects) {
+      return;
+    }
+
+    const currentProjects = projectsRef.current;
+
+    futureRef.current = futureRef.current.slice(1);
+    pastRef.current = [
+      ...pastRef.current,
+      cloneProjects(currentProjects),
+    ].slice(-MAX_HISTORY_ENTRIES);
+
+    replaceProjects(cloneProjects(nextProjects));
+    updateHistoryAvailability();
+  }, [replaceProjects, updateHistoryAvailability]);
 
   useEffect(() => {
-    setProjects(loadStoredProjects());
+    const storedProjects = loadStoredProjects();
+
+    projectsRef.current = storedProjects;
+    pastRef.current = [];
+    futureRef.current = [];
+
+    setProjects(storedProjects);
     setStorageLoaded(true);
-  }, []);
+    updateHistoryAvailability();
+  }, [updateHistoryAvailability]);
 
   useEffect(() => {
     if (!storageLoaded) {
@@ -245,14 +372,67 @@ export function useProjects() {
     }
   }, [projects, storageLoaded]);
 
+  useEffect(() => {
+    function handleKeyboardShortcut(event: KeyboardEvent) {
+      if (isEditableElement(event.target)) {
+        return;
+      }
+
+      const modifierPressed =
+        event.ctrlKey || event.metaKey;
+
+      if (!modifierPressed) {
+        return;
+      }
+
+      const pressedKey = event.key.toLowerCase();
+
+      if (pressedKey === "z" && event.shiftKey) {
+        event.preventDefault();
+        redo();
+        return;
+      }
+
+      if (pressedKey === "z") {
+        event.preventDefault();
+        undo();
+        return;
+      }
+
+      if (pressedKey === "y") {
+        event.preventDefault();
+        redo();
+      }
+    }
+
+    window.addEventListener(
+      "keydown",
+      handleKeyboardShortcut
+    );
+
+    return () => {
+      window.removeEventListener(
+        "keydown",
+        handleKeyboardShortcut
+      );
+    };
+  }, [redo, undo]);
+
   const filteredProjects = useMemo(() => {
     return projects.filter((project) => {
-      const normalizedSearch = search.trim().toLowerCase();
+      const normalizedSearch =
+        search.trim().toLowerCase();
 
       const matchesSearch =
-        project.title.toLowerCase().includes(normalizedSearch) ||
-        project.customer.toLowerCase().includes(normalizedSearch) ||
-        project.owner.toLowerCase().includes(normalizedSearch);
+        project.title
+          .toLowerCase()
+          .includes(normalizedSearch) ||
+        project.customer
+          .toLowerCase()
+          .includes(normalizedSearch) ||
+        project.owner
+          .toLowerCase()
+          .includes(normalizedSearch);
 
       const matchesStatus =
         statusFilter === "Alle" ||
@@ -289,12 +469,17 @@ export function useProjects() {
       seo: createEmptySeoData(),
     };
 
-    setProjects((current) => [newProject, ...current]);
+    applyProjectChange((current) => [
+      newProject,
+      ...current,
+    ]);
   }
 
   function deleteProject(projectId: string) {
-    setProjects((current) =>
-      current.filter((project) => project.id !== projectId)
+    applyProjectChange((current) =>
+      current.filter(
+        (project) => project.id !== projectId
+      )
     );
   }
 
@@ -307,7 +492,7 @@ export function useProjects() {
       Math.max(0, progress)
     );
 
-    setProjects((current) =>
+    applyProjectChange((current) =>
       current.map((project) =>
         project.id === projectId
           ? {
@@ -323,7 +508,7 @@ export function useProjects() {
     projectId: string,
     status: ProjectStatus
   ) {
-    setProjects((current) =>
+    applyProjectChange((current) =>
       current.map((project) =>
         project.id === projectId
           ? {
@@ -339,7 +524,7 @@ export function useProjects() {
     projectId: string,
     priority: ProjectPriority
   ) {
-    setProjects((current) =>
+    applyProjectChange((current) =>
       current.map((project) =>
         project.id === projectId
           ? {
@@ -355,7 +540,7 @@ export function useProjects() {
     projectId: string,
     taskId: string
   ) {
-    setProjects((current) =>
+    applyProjectChange((current) =>
       current.map((project) =>
         project.id === projectId
           ? {
@@ -378,7 +563,7 @@ export function useProjects() {
     projectId: string,
     seo: SeoData
   ) {
-    setProjects((current) =>
+    applyProjectChange((current) =>
       current.map((project) =>
         project.id === projectId
           ? {
@@ -408,6 +593,10 @@ export function useProjects() {
     setSearch,
     statusFilter,
     setStatusFilter,
+    canUndo,
+    canRedo,
+    undo,
+    redo,
     createProject,
     deleteProject,
     updateProjectProgress,
