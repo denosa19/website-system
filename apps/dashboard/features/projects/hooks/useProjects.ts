@@ -256,11 +256,18 @@ function isEditableElement(target: EventTarget | null) {
   );
 }
 
+function createProjectId() {
+  return `proj_${Date.now()}_${Math.random()
+    .toString(36)
+    .slice(2, 8)}`;
+}
+
 export function useProjects() {
   const [projects, setProjects] = useState<Project[]>(
     cloneProjects(initialProjects)
   );
-  const [storageLoaded, setStorageLoaded] = useState(false);
+  const [storageLoaded, setStorageLoaded] =
+    useState(false);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] =
     useState<ProjectStatusFilter>("Alle");
@@ -272,7 +279,9 @@ export function useProjects() {
   );
   const pastRef = useRef<Project[][]>([]);
   const futureRef = useRef<Project[][]>([]);
-  const historyGroupRef = useRef<HistoryGroup | null>(null);
+  const historyGroupRef = useRef<HistoryGroup | null>(
+    null
+  );
 
   const updateHistoryAvailability = useCallback(() => {
     setCanUndo(pastRef.current.length > 0);
@@ -309,7 +318,8 @@ export function useProjects() {
       const belongsToActiveGroup =
         Boolean(historyGroupKey) &&
         activeGroup?.key === historyGroupKey &&
-        now - activeGroup.updatedAt <= HISTORY_GROUP_TIMEOUT;
+        now - activeGroup.updatedAt <=
+          HISTORY_GROUP_TIMEOUT;
 
       if (!belongsToActiveGroup) {
         pastRef.current = [
@@ -484,21 +494,26 @@ export function useProjects() {
     });
   }, [projects, search, statusFilter]);
 
-  function createProject(data: CreateProjectData) {
+  function createProject(
+    data: CreateProjectData
+  ): Project | null {
     if (!data.title.trim() || !data.customer.trim()) {
       alert(
         "Bitte mindestens Projektname und Kunde eintragen."
       );
-      return;
+      return null;
     }
 
-    const id = `proj_${Date.now()}`;
+    const id = createProjectId();
 
     const newProject: Project = {
       id,
       title: data.title.trim(),
       customerId:
-        data.customerId || `manual_${Date.now()}`,
+        data.customerId ||
+        `manual_${Date.now()}_${Math.random()
+          .toString(36)
+          .slice(2, 8)}`,
       customer: data.customer.trim(),
       type: data.type,
       status: data.status,
@@ -515,6 +530,8 @@ export function useProjects() {
       newProject,
       ...current,
     ]);
+
+    return newProject;
   }
 
   function deleteProject(projectId: string) {
@@ -632,6 +649,7 @@ export function useProjects() {
   }
 
   return {
+    projects,
     filteredProjects,
     search,
     setSearch,
