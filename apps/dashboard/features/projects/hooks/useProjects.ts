@@ -31,8 +31,14 @@ type CreateProjectData = {
 
 type ProjectStatusFilter = "Alle" | ProjectStatus;
 
+type HistoryGroup = {
+  key: string;
+  updatedAt: number;
+};
+
 const PROJECTS_STORAGE_KEY = "internet-firma-projects";
 const MAX_HISTORY_ENTRIES = 50;
+const HISTORY_GROUP_TIMEOUT = 1000;
 
 function createTasksFromTemplate(
   projectId: string,
@@ -266,6 +272,7 @@ export function useProjects() {
   );
   const pastRef = useRef<Project[][]>([]);
   const futureRef = useRef<Project[][]>([]);
+  const historyGroupRef = useRef<HistoryGroup | null>(null);
 
   const updateHistoryAvailability = useCallback(() => {
     setCanUndo(pastRef.current.length > 0);
@@ -280,9 +287,14 @@ export function useProjects() {
     []
   );
 
+  const resetHistoryGroup = useCallback(() => {
+    historyGroupRef.current = null;
+  }, []);
+
   const applyProjectChange = useCallback(
     (
-      updater: (currentProjects: Project[]) => Project[]
+      updater: (currentProjects: Project[]) => Project[],
+      historyGroupKey?: string
     ) => {
       const currentProjects = projectsRef.current;
       const nextProjects = updater(currentProjects);
@@ -291,10 +303,27 @@ export function useProjects() {
         return;
       }
 
-      pastRef.current = [
-        ...pastRef.current,
-        cloneProjects(currentProjects),
-      ].slice(-MAX_HISTORY_ENTRIES);
+      const now = Date.now();
+      const activeGroup = historyGroupRef.current;
+
+      const belongsToActiveGroup =
+        Boolean(historyGroupKey) &&
+        activeGroup?.key === historyGroupKey &&
+        now - activeGroup.updatedAt <= HISTORY_GROUP_TIMEOUT;
+
+      if (!belongsToActiveGroup) {
+        pastRef.current = [
+          ...pastRef.current,
+          cloneProjects(currentProjects),
+        ].slice(-MAX_HISTORY_ENTRIES);
+      }
+
+      historyGroupRef.current = historyGroupKey
+        ? {
+            key: historyGroupKey,
+            updatedAt: now,
+          }
+        : null;
 
       futureRef.current = [];
 
@@ -313,6 +342,8 @@ export function useProjects() {
 
     const currentProjects = projectsRef.current;
 
+    resetHistoryGroup();
+
     pastRef.current = pastRef.current.slice(0, -1);
     futureRef.current = [
       cloneProjects(currentProjects),
@@ -321,7 +352,11 @@ export function useProjects() {
 
     replaceProjects(cloneProjects(previousProjects));
     updateHistoryAvailability();
-  }, [replaceProjects, updateHistoryAvailability]);
+  }, [
+    replaceProjects,
+    resetHistoryGroup,
+    updateHistoryAvailability,
+  ]);
 
   const redo = useCallback(() => {
     const nextProjects = futureRef.current[0];
@@ -332,6 +367,8 @@ export function useProjects() {
 
     const currentProjects = projectsRef.current;
 
+    resetHistoryGroup();
+
     futureRef.current = futureRef.current.slice(1);
     pastRef.current = [
       ...pastRef.current,
@@ -340,7 +377,11 @@ export function useProjects() {
 
     replaceProjects(cloneProjects(nextProjects));
     updateHistoryAvailability();
-  }, [replaceProjects, updateHistoryAvailability]);
+  }, [
+    replaceProjects,
+    resetHistoryGroup,
+    updateHistoryAvailability,
+  ]);
 
   useEffect(() => {
     const storedProjects = loadStoredProjects();
@@ -348,6 +389,7 @@ export function useProjects() {
     projectsRef.current = storedProjects;
     pastRef.current = [];
     futureRef.current = [];
+    historyGroupRef.current = null;
 
     setProjects(storedProjects);
     setStorageLoaded(true);
@@ -492,15 +534,17 @@ export function useProjects() {
       Math.max(0, progress)
     );
 
-    applyProjectChange((current) =>
-      current.map((project) =>
-        project.id === projectId
-          ? {
-              ...project,
-              progress: safeProgress,
-            }
-          : project
-      )
+    applyProjectChange(
+      (current) =>
+        current.map((project) =>
+          project.id === projectId
+            ? {
+                ...project,
+                progress: safeProgress,
+              }
+            : project
+        ),
+      `project-progress:${projectId}`
     );
   }
 
