@@ -1,6 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
 import { comments } from "@/data/comments";
 import { timeline } from "@/data/timeline";
 import type { ProjectComment } from "@/types/comment";
@@ -12,6 +15,15 @@ type ProjectCommunicationProps = {
   projectId: string;
 };
 
+type StoredProjectCommunication = {
+  comments: ProjectComment[];
+  timelineEvents: TimelineEvent[];
+};
+
+function getStorageKey(projectId: string) {
+  return `project-communication-${projectId}`;
+}
+
 export default function ProjectCommunication({
   projectId,
 }: ProjectCommunicationProps) {
@@ -20,6 +32,70 @@ export default function ProjectCommunication({
 
   const [timelineEvents, setTimelineEvents] =
     useState<TimelineEvent[]>(timeline);
+
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    const storageKey = getStorageKey(projectId);
+    const storedCommunication =
+      window.localStorage.getItem(storageKey);
+
+    if (!storedCommunication) {
+      setProjectComments(comments);
+      setTimelineEvents(timeline);
+      setIsLoaded(true);
+      return;
+    }
+
+    try {
+      const parsedCommunication =
+        JSON.parse(
+          storedCommunication
+        ) as StoredProjectCommunication;
+
+      setProjectComments(
+        Array.isArray(parsedCommunication.comments)
+          ? parsedCommunication.comments
+          : comments
+      );
+
+      setTimelineEvents(
+        Array.isArray(
+          parsedCommunication.timelineEvents
+        )
+          ? parsedCommunication.timelineEvents
+          : timeline
+      );
+    } catch {
+      setProjectComments(comments);
+      setTimelineEvents(timeline);
+    }
+
+    setIsLoaded(true);
+  }, [projectId]);
+
+  useEffect(() => {
+    if (!isLoaded) {
+      return;
+    }
+
+    const storageKey = getStorageKey(projectId);
+
+    const communicationToStore: StoredProjectCommunication = {
+      comments: projectComments,
+      timelineEvents,
+    };
+
+    window.localStorage.setItem(
+      storageKey,
+      JSON.stringify(communicationToStore)
+    );
+  }, [
+    isLoaded,
+    projectComments,
+    projectId,
+    timelineEvents,
+  ]);
 
   function handleCommentCreated(
     comment: ProjectComment,
