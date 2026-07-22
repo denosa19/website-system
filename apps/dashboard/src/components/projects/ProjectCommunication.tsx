@@ -112,12 +112,39 @@ export default function ProjectCommunication({
     ]);
   }
 
+  function handleCommentUpdated(
+    commentId: string,
+    message: string
+  ) {
+    setProjectComments((currentComments) =>
+      currentComments.map((comment) =>
+        comment.id === commentId
+          ? {
+              ...comment,
+              message,
+              updatedAt: new Date().toISOString(),
+            }
+          : comment
+      )
+    );
+  }
+
+  function handleCommentDeleted(commentId: string) {
+    setProjectComments((currentComments) =>
+      currentComments.filter(
+        (comment) => comment.id !== commentId
+      )
+    );
+  }
+
   return (
     <div className="grid gap-6 xl:grid-cols-2">
       <ProjectComments
         projectId={projectId}
         comments={projectComments}
         onCommentCreated={handleCommentCreated}
+        onCommentUpdated={handleCommentUpdated}
+        onCommentDeleted={handleCommentDeleted}
       />
 
       <ProjectTimeline
