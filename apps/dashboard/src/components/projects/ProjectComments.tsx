@@ -5,11 +5,16 @@ import {
   useMemo,
   useState,
 } from "react";
+import { createCommentActivity } from "@/lib/projectActivity";
 import type { ProjectComment } from "@/types/comment";
+import type { TimelineEvent } from "@/types/timeline";
 
 type ProjectCommentsProps = {
   projectId: string;
   initialComments: ProjectComment[];
+  onActivityCreated: (
+    activity: TimelineEvent
+  ) => void;
 };
 
 function formatCommentDate(date: string) {
@@ -22,6 +27,7 @@ function formatCommentDate(date: string) {
 export default function ProjectComments({
   projectId,
   initialComments,
+  onActivityCreated,
 }: ProjectCommentsProps) {
   const [comments, setComments] =
     useState<ProjectComment[]>(initialComments);
@@ -37,8 +43,12 @@ export default function ProjectComments({
         )
         .sort(
           (firstComment, secondComment) =>
-            new Date(secondComment.createdAt).getTime() -
-            new Date(firstComment.createdAt).getTime()
+            new Date(
+              secondComment.createdAt
+            ).getTime() -
+            new Date(
+              firstComment.createdAt
+            ).getTime()
         ),
     [comments, projectId]
   );
@@ -55,18 +65,27 @@ export default function ProjectComments({
       return;
     }
 
+    const author = "Dennis";
+
     const newComment: ProjectComment = {
       id: `comment_${Date.now()}`,
       projectId,
-      author: "Dennis",
+      author,
       message: trimmedMessage,
       createdAt: new Date().toISOString(),
     };
+
+    const commentActivity = createCommentActivity(
+      projectId,
+      author
+    );
 
     setComments((currentComments) => [
       newComment,
       ...currentComments,
     ]);
+
+    onActivityCreated(commentActivity);
 
     setMessage("");
     setError("");
