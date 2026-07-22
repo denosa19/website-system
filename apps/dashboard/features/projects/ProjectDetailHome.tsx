@@ -7,6 +7,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import ProjectCommunication from "@/components/projects/ProjectCommunication";
 import { customers } from "../../data/customers";
 import { projects as initialProjects } from "../../data/projects";
 import type {
@@ -826,6 +827,10 @@ export default function ProjectDetailHome({
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="mt-8">
+        <ProjectCommunication projectId={project.id} />
       </div>
     </section>
   );
