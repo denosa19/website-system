@@ -21,6 +21,18 @@ type ActivityActionFilter =
 
 type ProjectFilter = "all" | string;
 
+type ActivityPeriodFilter =
+  | "all"
+  | "today"
+  | "7days"
+  | "30days";
+
+type ActivityGroup = {
+  key: string;
+  label: string;
+  activities: ProjectActivity[];
+};
+
 const actionIcons: Record<
   ProjectActivityAction,
   string
@@ -47,31 +59,100 @@ const actionLabels: Record<
   seo_changed: "SEO",
 };
 
-function formatActivityDate(timestamp: string) {
-  const date = new Date(timestamp);
-  const today = new Date();
+const periodLabels: Record<
+  ActivityPeriodFilter,
+  string
+> = {
+  all: "Gesamter Zeitraum",
+  today: "Heute",
+  "7days": "Letzte 7 Tage",
+  "30days": "Letzte 30 Tage",
+};
 
-  const isToday =
-    date.getDate() === today.getDate() &&
-    date.getMonth() === today.getMonth() &&
-    date.getFullYear() === today.getFullYear();
+function startOfDay(date: Date) {
+  const result = new Date(date);
 
-  const time = new Intl.DateTimeFormat("de-DE", {
+  result.setHours(0, 0, 0, 0);
+
+  return result;
+}
+
+function createDateKey(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(
+    2,
+    "0"
+  );
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+function formatActivityTime(timestamp: string) {
+  return new Intl.DateTimeFormat("de-DE", {
     hour: "2-digit",
     minute: "2-digit",
-  }).format(date);
+  }).format(new Date(timestamp));
+}
 
-  if (isToday) {
-    return `Heute, ${time}`;
+function formatGroupDate(timestamp: string) {
+  const date = startOfDay(new Date(timestamp));
+  const today = startOfDay(new Date());
+
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  if (date.getTime() === today.getTime()) {
+    return "Heute";
   }
 
-  const day = new Intl.DateTimeFormat("de-DE", {
+  if (date.getTime() === yesterday.getTime()) {
+    return "Gestern";
+  }
+
+  return new Intl.DateTimeFormat("de-DE", {
+    weekday: "long",
     day: "2-digit",
-    month: "2-digit",
+    month: "long",
     year: "numeric",
   }).format(date);
+}
 
-  return `${day}, ${time}`;
+function matchesPeriod(
+  timestamp: string,
+  period: ActivityPeriodFilter
+) {
+  if (period === "all") {
+    return true;
+  }
+
+  const activityDate = new Date(timestamp);
+
+  if (Number.isNaN(activityDate.getTime())) {
+    return false;
+  }
+
+  const today = startOfDay(new Date());
+  const activityDay = startOfDay(activityDate);
+
+  if (period === "today") {
+    return activityDay.getTime() === today.getTime();
+  }
+
+  const earliestDate = new Date(today);
+
+  if (period === "7days") {
+    earliestDate.setDate(earliestDate.getDate() - 6);
+  }
+
+  if (period === "30days") {
+    earliestDate.setDate(earliestDate.getDate() - 29);
+  }
+
+  return (
+    activityDay.getTime() >= earliestDate.getTime() &&
+    activityDay.getTime() <= today.getTime()
+  );
 }
 
 export default function ProjectActivityTimeline({
@@ -82,11 +163,15 @@ export default function ProjectActivityTimeline({
     useState(true);
 
   const [search, setSearch] = useState("");
+
   const [projectFilter, setProjectFilter] =
     useState<ProjectFilter>("all");
 
   const [actionFilter, setActionFilter] =
     useState<ActivityActionFilter>("all");
+
+  const [periodFilter, setPeriodFilter] =
+    useState<ActivityPeriodFilter>("all");
 
   const projectOptions = useMemo(() => {
     const projects = new Map<string, string>();
@@ -126,6 +211,11 @@ export default function ProjectActivityTimeline({
         actionFilter === "all" ||
         activity.action === actionFilter;
 
+      const matchesSelectedPeriod = matchesPeriod(
+        activity.timestamp,
+        periodFilter
+      );
+
       const searchableContent = [
         activity.projectTitle,
         activity.title,
@@ -143,25 +233,57 @@ export default function ProjectActivityTimeline({
       return (
         matchesProject &&
         matchesAction &&
+        matchesSelectedPeriod &&
         matchesSearch
       );
     });
   }, [
     activities,
     actionFilter,
+    periodFilter,
     projectFilter,
     search,
   ]);
 
+  const groupedActivities = useMemo(() => {
+    const groups = new Map<string, ActivityGroup>();
+
+    filteredActivities.forEach((activity) => {
+      const activityDate = new Date(activity.timestamp);
+      const key = createDateKey(activityDate);
+      const existingGroup = groups.get(key);
+
+      if (existingGroup) {
+        existingGroup.activities.push(activity);
+        return;
+      }
+
+      groups.set(key, {
+        key,
+        label: formatGroupDate(activity.timestamp),
+        activities: [activity],
+      });
+    });
+
+    return Array.from(groups.values());
+  }, [filteredActivities]);
+
   const filtersAreActive =
     search.trim().length > 0 ||
     projectFilter !== "all" ||
-    actionFilter !== "all";
+    actionFilter !== "all" ||
+    periodFilter !== "all";
 
   function resetFilters() {
     setSearch("");
     setProjectFilter("all");
     setActionFilter("all");
+    setPeriodFilter("all");
+  }
+
+  function handleClearActivities() {
+    onClear();
+    resetFilters();
   }
 
   return (
@@ -203,7 +325,7 @@ export default function ProjectActivityTimeline({
         {activities.length > 0 ? (
           <button
             type="button"
-            onClick={onClear}
+            onClick={handleClearActivities}
             className="shrink-0 rounded-lg border border-neutral-700 px-3 py-2 text-xs font-medium text-neutral-400 transition hover:border-red-500/60 hover:bg-red-500/10 hover:text-red-300"
           >
             Verlauf löschen
@@ -214,7 +336,7 @@ export default function ProjectActivityTimeline({
       {isExpanded ? (
         <>
           {activities.length > 0 ? (
-            <div className="space-y-3 border-b border-neutral-800 px-6 py-5">
+            <div className="space-y-4 border-b border-neutral-800 px-6 py-5">
               <div>
                 <label
                   htmlFor="activity-search"
@@ -306,6 +428,36 @@ export default function ProjectActivityTimeline({
                 </div>
               </div>
 
+              <div>
+                <p className="mb-2 text-xs font-medium text-neutral-400">
+                  Zeitraum
+                </p>
+
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  {(
+                    Object.entries(periodLabels) as [
+                      ActivityPeriodFilter,
+                      string,
+                    ][]
+                  ).map(([period, label]) => (
+                    <button
+                      key={period}
+                      type="button"
+                      onClick={() =>
+                        setPeriodFilter(period)
+                      }
+                      className={`rounded-lg border px-3 py-2 text-xs font-medium transition ${
+                        periodFilter === period
+                          ? "border-white bg-white text-black"
+                          : "border-neutral-700 text-neutral-400 hover:border-neutral-500 hover:bg-neutral-800 hover:text-white"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <p className="text-xs text-neutral-500">
                   {filteredActivities.length}{" "}
@@ -327,7 +479,7 @@ export default function ProjectActivityTimeline({
             </div>
           ) : null}
 
-          <div className="max-h-[520px] overflow-y-auto">
+          <div className="max-h-[580px] overflow-y-auto">
             {activities.length === 0 ? (
               <div className="px-6 py-10 text-center">
                 <p className="text-sm font-medium text-neutral-300">
@@ -346,7 +498,8 @@ export default function ProjectActivityTimeline({
                 </p>
 
                 <p className="mt-2 text-xs leading-5 text-neutral-500">
-                  Für die aktuellen Filter wurden keine
+                  Für die aktuellen Filter und den
+                  ausgewählten Zeitraum wurden keine
                   Einträge gefunden.
                 </p>
 
@@ -359,45 +512,68 @@ export default function ProjectActivityTimeline({
                 </button>
               </div>
             ) : (
-              <div className="divide-y divide-neutral-800">
-                {filteredActivities.map((activity) => (
-                  <article
-                    key={activity.id}
-                    className="flex gap-4 px-6 py-5"
-                  >
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-neutral-700 bg-neutral-950 text-[11px] font-bold text-neutral-300">
-                      {actionIcons[activity.action]}
-                    </div>
-
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
-                        <h3 className="text-sm font-semibold text-white">
-                          {activity.title}
+              <div>
+                {groupedActivities.map((group) => (
+                  <section key={group.key}>
+                    <div className="sticky top-0 z-10 border-y border-neutral-800 bg-neutral-900/95 px-6 py-3 backdrop-blur">
+                      <div className="flex items-center justify-between gap-4">
+                        <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-400">
+                          {group.label}
                         </h3>
 
-                        <time
-                          dateTime={activity.timestamp}
-                          className="text-xs text-neutral-500"
-                        >
-                          {formatActivityDate(
-                            activity.timestamp
-                          )}
-                        </time>
+                        <span className="text-[11px] text-neutral-600">
+                          {group.activities.length}{" "}
+                          {group.activities.length === 1
+                            ? "Eintrag"
+                            : "Einträge"}
+                        </span>
                       </div>
-
-                      <p className="mt-1 truncate text-sm text-neutral-300">
-                        {activity.projectTitle}
-                      </p>
-
-                      <p className="mt-2 text-xs leading-5 text-neutral-500">
-                        {activity.description}
-                      </p>
-
-                      <p className="mt-2 text-[11px] text-neutral-600">
-                        Von {activity.user}
-                      </p>
                     </div>
-                  </article>
+
+                    <div className="divide-y divide-neutral-800">
+                      {group.activities.map((activity) => (
+                        <article
+                          key={activity.id}
+                          className="flex gap-4 px-6 py-5"
+                        >
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-neutral-700 bg-neutral-950 text-[11px] font-bold text-neutral-300">
+                            {actionIcons[activity.action]}
+                          </div>
+
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
+                              <h4 className="text-sm font-semibold text-white">
+                                {activity.title}
+                              </h4>
+
+                              <time
+                                dateTime={
+                                  activity.timestamp
+                                }
+                                className="text-xs text-neutral-500"
+                              >
+                                {formatActivityTime(
+                                  activity.timestamp
+                                )}
+                              </time>
+                            </div>
+
+                            <p className="mt-1 truncate text-sm text-neutral-300">
+                              {activity.projectTitle}
+                            </p>
+
+                            <p className="mt-2 text-xs leading-5 text-neutral-500">
+                              {activity.description}
+                            </p>
+
+                            <p className="mt-2 text-[11px] text-neutral-600">
+                              Von {activity.user}
+                            </p>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  </section>
                 ))}
               </div>
             )}
