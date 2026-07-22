@@ -1,18 +1,30 @@
-import { ProjectComment } from "@/types/comment";
+import { TimelineEvent } from "@/types/timeline";
 
-export const comments: ProjectComment[] = [
+export const timeline: TimelineEvent[] = [
   {
-    id: "comment_001",
+    id: "timeline_001",
     projectId: "proj_001",
+    type: "project_created",
+    title: "Projekt erstellt",
     author: "Dennis",
-    message: "Projekt erstellt und erste Planung abgeschlossen.",
-    createdAt: "2026-07-22T10:30:00",
+    createdAt: "2026-07-22T09:00:00",
   },
   {
-    id: "comment_002",
+    id: "timeline_002",
     projectId: "proj_001",
+    type: "status_changed",
+    title: "Status geändert",
+    description: "Projektstatus auf „In Umsetzung“ gesetzt.",
     author: "Dennis",
-    message: "Kundendaten überprüft und Projekt freigegeben.",
-    createdAt: "2026-07-22T14:15:00",
+    createdAt: "2026-07-22T10:00:00",
+  },
+  {
+    id: "timeline_003",
+    projectId: "proj_001",
+    type: "comment_added",
+    title: "Kommentar hinzugefügt",
+    description: "Erste Projektplanung abgeschlossen.",
+    author: "Dennis",
+    createdAt: "2026-07-22T10:30:00",
   },
 ];
