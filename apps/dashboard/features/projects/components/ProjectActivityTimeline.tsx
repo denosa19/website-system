@@ -95,6 +95,23 @@ function formatActivityTime(timestamp: string) {
   }).format(new Date(timestamp));
 }
 
+function formatExportDate(timestamp: string) {
+  const date = new Date(timestamp);
+
+  if (Number.isNaN(date.getTime())) {
+    return timestamp;
+  }
+
+  return new Intl.DateTimeFormat("de-DE", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  }).format(date);
+}
+
 function formatGroupDate(timestamp: string) {
   const date = startOfDay(new Date(timestamp));
   const today = startOfDay(new Date());
@@ -153,6 +170,27 @@ function matchesPeriod(
     activityDay.getTime() >= earliestDate.getTime() &&
     activityDay.getTime() <= today.getTime()
   );
+}
+
+function escapeCsvValue(value: string) {
+  const normalizedValue = value
+    .replace(/\r\n/g, " ")
+    .replace(/\n/g, " ")
+    .replace(/\r/g, " ");
+
+  return `"${normalizedValue.replace(/"/g, '""')}"`;
+}
+
+function createExportFileName() {
+  const now = new Date();
+  const date = createDateKey(now);
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(
+    2,
+    "0"
+  );
+
+  return `projektaktivitaeten_${date}_${hours}-${minutes}.csv`;
 }
 
 export default function ProjectActivityTimeline({
@@ -286,6 +324,63 @@ export default function ProjectActivityTimeline({
     resetFilters();
   }
 
+  function handleExportActivities() {
+    if (filteredActivities.length === 0) {
+      return;
+    }
+
+    const headers = [
+      "Datum",
+      "Projekt-ID",
+      "Projekt",
+      "Aktivitätstyp",
+      "Titel",
+      "Beschreibung",
+      "Benutzer",
+    ];
+
+    const rows = filteredActivities.map((activity) => [
+      formatExportDate(activity.timestamp),
+      activity.projectId,
+      activity.projectTitle,
+      actionLabels[activity.action],
+      activity.title,
+      activity.description,
+      activity.user,
+    ]);
+
+    const csvContent = [
+      headers,
+      ...rows,
+    ]
+      .map((row) =>
+        row
+          .map((value) => escapeCsvValue(value))
+          .join(";")
+      )
+      .join("\r\n");
+
+    const blob = new Blob(
+      [`\uFEFF${csvContent}`],
+      {
+        type: "text/csv;charset=utf-8",
+      }
+    );
+
+    const downloadUrl = URL.createObjectURL(blob);
+    const downloadLink =
+      document.createElement("a");
+
+    downloadLink.href = downloadUrl;
+    downloadLink.download = createExportFileName();
+
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    downloadLink.remove();
+
+    URL.revokeObjectURL(downloadUrl);
+  }
+
   return (
     <Card className="overflow-hidden p-0">
       <div className="flex items-center justify-between gap-4 border-b border-neutral-800 px-6 py-5">
@@ -323,13 +418,24 @@ export default function ProjectActivityTimeline({
         </button>
 
         {activities.length > 0 ? (
-          <button
-            type="button"
-            onClick={handleClearActivities}
-            className="shrink-0 rounded-lg border border-neutral-700 px-3 py-2 text-xs font-medium text-neutral-400 transition hover:border-red-500/60 hover:bg-red-500/10 hover:text-red-300"
-          >
-            Verlauf löschen
-          </button>
+          <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={handleExportActivities}
+              disabled={filteredActivities.length === 0}
+              className="rounded-lg border border-neutral-700 px-3 py-2 text-xs font-medium text-neutral-300 transition hover:border-neutral-500 hover:bg-neutral-800 hover:text-white disabled:cursor-not-allowed disabled:border-neutral-800 disabled:text-neutral-600 disabled:hover:bg-transparent"
+            >
+              CSV exportieren
+            </button>
+
+            <button
+              type="button"
+              onClick={handleClearActivities}
+              className="rounded-lg border border-neutral-700 px-3 py-2 text-xs font-medium text-neutral-400 transition hover:border-red-500/60 hover:bg-red-500/10 hover:text-red-300"
+            >
+              Verlauf löschen
+            </button>
+          </div>
         ) : null}
       </div>
 
@@ -460,10 +566,7 @@ export default function ProjectActivityTimeline({
 
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <p className="text-xs text-neutral-500">
-                  {filteredActivities.length}{" "}
-                  {filteredActivities.length === 1
-                    ? "Treffer"
-                    : "Treffer"}
+                  {filteredActivities.length} Treffer
                 </p>
 
                 {filtersAreActive ? (
