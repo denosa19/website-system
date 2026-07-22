@@ -1,142 +1,174 @@
-# Next Block
+# NEXT_BLOCK
 
-## Ausgangspunkt
+Aktueller Stand
 
-Der aktuelle Projektstand entspricht:
+Version: 0.1
 
-```text
-Release 0.9
-Block 42 abgeschlossen
-```
-
-Die dynamische Projekt-Detailroute ist vorhanden:
-
-```text
-/projects/[projectId]
-```
-
-Ein Projekt kann über seine stabile Projekt-ID geöffnet werden.
-
-Die Route zeigt aktuell:
-
-- Projektname
-- Kunde
-- Projekttyp
-- Status
-- Priorität
-- Fortschritt
-- Deadline
-- Verantwortlicher
-- Aufgabenstatistik
-- Modulstatistik
-- Projekt-ID
-
-Ungültige oder gelöschte Projekte werden kontrolliert behandelt.
+Zuletzt abgeschlossen:
+Block 43
 
 ---
 
-## Block 43
+# Nächster Entwicklungsblock
 
-### Titel
+## Block 44
 
-Projektstammdaten auf der Detailroute bearbeiten
+Name:
 
-### Ziel
+Projektkommunikation
 
-Die wichtigsten Stammdaten eines Projekts sollen direkt auf der eigenen Projekt-Detailroute bearbeitet werden können.
+Status:
 
-### Geplanter Umfang
-
-Bearbeitbar werden:
-
-- Projektname
-- Kunde
-- Projekttyp
-- Status
-- Priorität
-- Deadline
-- Verantwortlicher
-
-Zusätzlich:
-
-- Änderungen werden direkt in den LocalStorage übernommen
-- Projekt-ID bleibt unverändert
-- Aufgaben bleiben vollständig erhalten
-- Module bleiben vollständig erhalten
-- SEO-Daten bleiben vollständig erhalten
-- Bearbeitungsmodus öffnen
-- Änderungen speichern
-- Änderungen abbrechen
-- Pflichtfelder validieren
-- bestehende Projektmigration weiterverwenden
-
----
-
-### Technische Anforderungen
-
-Die Umsetzung soll:
-
-- den bestehenden `Project`-Typ weiterverwenden
-- keine neuen Datenmodelle einführen
-- ausschließlich auf der Projekt-Detailroute arbeiten
-- bestehende LocalStorage-Funktionen weiterverwenden
-- keine bestehenden Funktionen der Projektübersicht entfernen
-- vollständig kompatibel mit vorhandenen Projekten bleiben
-
----
-
-### Nicht Bestandteil dieses Blocks
-
-- Fortschrittsberechnung ändern
-- Aufgaben hinzufügen
-- Aufgaben löschen
-- Aufgaben umbenennen
-- Module bearbeiten
-- SEO bearbeiten
-- Aktivitätsprotokoll
-- Projektnotizen
-- Dateiverwaltung
-- Datenbank
-- Authentifizierung
-- Mehrbenutzerbetrieb
-
----
-
-### Ergebnis nach Abschluss
-
-Nach Block 43 soll ein Projekt vollständig auf seiner eigenen Detailseite bearbeitet werden können.
-
-Die Projektübersicht dient anschließend hauptsächlich als Navigation, während die eigentliche Projektpflege auf der Detailroute erfolgt.
-
-Alle Änderungen werden dauerhaft im LocalStorage gespeichert und stehen nach einem Neuladen der Anwendung weiterhin zur Verfügung.
-
-Die bestehende Projekt-ID bleibt unverändert, damit zukünftige Funktionen wie Aufgabenverwaltung, Notizen, Dateien und Aktivitätsprotokoll auf derselben Projektbasis aufbauen können.
-
----
-
-### Akzeptanzkriterien
-
-Der Block gilt als abgeschlossen, wenn:
-
-- Projektname bearbeitet werden kann
-- Kunde bearbeitet werden kann
-- Projekttyp bearbeitet werden kann
-- Status bearbeitet werden kann
-- Priorität bearbeitet werden kann
-- Deadline bearbeitet werden kann
-- Verantwortlicher bearbeitet werden kann
-- Speichern funktioniert
-- Abbrechen funktioniert
-- Änderungen nach Reload erhalten bleiben
-- Projekt-ID unverändert bleibt
-- Aufgaben unverändert bleiben
-- Module unverändert bleiben
-- Bestehende Projekte weiterhin korrekt geladen werden
-
----
-
-### Status
-
-```text
 Bereit zur Umsetzung
+
+---
+
+# Ziel
+
+Jedes Projekt erhält eine eigene Kommunikationshistorie.
+
+Alle wichtigen Informationen sollen direkt am Projekt dokumentiert werden.
+
+Dadurch entfällt die Kommunikation über externe Notizen oder Messenger.
+
+---
+
+# Funktionen
+
+## Kommentare
+
+- Kommentar hinzufügen
+- Kommentare bearbeiten
+- Kommentare löschen
+
+---
+
+## Projektnotizen
+
+- Freitext
+- Dauerhafte Notizen
+- Beliebig viele Einträge
+
+---
+
+## Chronik
+
+Automatische Einträge bei:
+
+- Projekt erstellt
+- Status geändert
+- Priorität geändert
+- Besitzer geändert
+- Deadline geändert
+- Projekt bearbeitet
+
+---
+
+## Zeitstempel
+
+Jeder Eintrag besitzt:
+
+- Datum
+- Uhrzeit
+- Benutzer
+- Typ
+
+---
+
+## Darstellung
+
+Neue Sektion auf der Projektdetailseite:
+
 ```
+──────────────────────────────
+
+Projektkommunikation
+
+──────────────────────────────
+
+Kommentar schreiben
+
+[______________________]
+
+[Speichern]
+
+──────────────────────────────
+
+Heute
+
+Dennis
+
+Projekt erstellt.
+
+──────────────────────────────
+
+Heute
+
+Status geändert:
+
+In Umsetzung
+
+──────────────────────────────
+
+Heute
+
+Deadline geändert.
+
+──────────────────────────────
+```
+
+---
+
+# Architektur
+
+Neue Komponenten
+
+```
+components/project/
+
+ProjectComments.tsx
+
+ProjectCommentItem.tsx
+
+ProjectNotes.tsx
+
+ProjectTimeline.tsx
+
+TimelineItem.tsx
+```
+
+Neue Datentypen
+
+```
+types/
+
+comment.ts
+
+timeline.ts
+```
+
+Neue Beispieldaten
+
+```
+data/
+
+comments.ts
+
+timeline.ts
+```
+
+---
+
+# Qualitätsregeln
+
+- Wiederverwendbare Komponenten
+- TypeScript Strict
+- Responsive
+- Keine Doppelentwicklungen
+- Bestehende Architektur beibehalten
+
+---
+
+# Definition abgeschlossen
+
+Nach Abschluss dieses Blocks wird Block 45 geplant.
