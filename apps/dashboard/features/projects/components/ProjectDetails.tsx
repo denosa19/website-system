@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { Project } from "../../../types/project";
 import type { SeoData } from "../../../types/seo";
@@ -10,8 +11,14 @@ import WebsiteWizard from "./WebsiteWizard";
 
 type Props = {
   project: Project | null;
-  onToggleTask: (projectId: string, taskId: string) => void;
-  onUpdateSeo: (projectId: string, seo: SeoData) => void;
+  onToggleTask: (
+    projectId: string,
+    taskId: string
+  ) => void;
+  onUpdateSeo: (
+    projectId: string,
+    seo: SeoData
+  ) => void;
 };
 
 export default function ProjectDetails({
@@ -19,9 +26,8 @@ export default function ProjectDetails({
   onToggleTask,
   onUpdateSeo,
 }: Props) {
-  const [selectedModuleId, setSelectedModuleId] = useState<string | null>(
-    null
-  );
+  const [selectedModuleId, setSelectedModuleId] =
+    useState<string | null>(null);
 
   const selectedModule = useMemo(() => {
     if (!project) {
@@ -30,7 +36,8 @@ export default function ProjectDetails({
 
     return (
       project.modules.find(
-        (module) => module.id === selectedModuleId
+        (module) =>
+          module.id === selectedModuleId
       ) ??
       project.modules[0] ??
       null
@@ -40,8 +47,8 @@ export default function ProjectDetails({
   if (!project) {
     return (
       <div className="rounded-2xl border border-dashed border-neutral-800 p-8 text-neutral-400">
-        Wähle ein Projekt aus, um Details, Checkliste, Module und
-        AI-Prompt zu sehen.
+        Wähle ein Projekt aus, um Details,
+        Checkliste, Module und AI-Prompt zu sehen.
       </div>
     );
   }
@@ -53,53 +60,114 @@ export default function ProjectDetails({
   return (
     <div className="space-y-6">
       <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
-        <h2 className="text-2xl font-bold">{project.title}</h2>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h2 className="text-2xl font-bold">
+              {project.title}
+            </h2>
+
+            <p className="mt-2 text-sm text-neutral-500">
+              {project.customer}
+            </p>
+          </div>
+
+          <Link
+            href={`/projects/${encodeURIComponent(
+              project.id
+            )}`}
+            className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl border border-neutral-700 bg-neutral-950 px-4 py-2 text-sm font-medium text-neutral-200 transition hover:border-neutral-500 hover:bg-neutral-800 hover:text-white"
+          >
+            Projekt öffnen
+            <span
+              aria-hidden="true"
+              className="ml-2"
+            >
+              →
+            </span>
+          </Link>
+        </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           <div>
-            <p className="text-sm text-neutral-500">Kunde</p>
-            <p className="mt-1 text-white">{project.customer}</p>
+            <p className="text-sm text-neutral-500">
+              Kunde
+            </p>
+
+            <p className="mt-1 text-white">
+              {project.customer}
+            </p>
           </div>
 
           <div>
-            <p className="text-sm text-neutral-500">Projekttyp</p>
-            <p className="mt-1 text-white">{project.type}</p>
+            <p className="text-sm text-neutral-500">
+              Projekttyp
+            </p>
+
+            <p className="mt-1 text-white">
+              {project.type}
+            </p>
           </div>
 
           <div>
-            <p className="text-sm text-neutral-500">Status</p>
-            <p className="mt-1 text-white">{project.status}</p>
+            <p className="text-sm text-neutral-500">
+              Status
+            </p>
+
+            <p className="mt-1 text-white">
+              {project.status}
+            </p>
           </div>
 
           <div>
-            <p className="text-sm text-neutral-500">Priorität</p>
-            <p className="mt-1 text-white">{project.priority}</p>
+            <p className="text-sm text-neutral-500">
+              Priorität
+            </p>
+
+            <p className="mt-1 text-white">
+              {project.priority}
+            </p>
           </div>
 
           <div>
-            <p className="text-sm text-neutral-500">Deadline</p>
+            <p className="text-sm text-neutral-500">
+              Deadline
+            </p>
+
             <p className="mt-1 text-white">
               {project.deadline || "Keine Deadline"}
             </p>
           </div>
 
           <div>
-            <p className="text-sm text-neutral-500">Verantwortlich</p>
-            <p className="mt-1 text-white">{project.owner}</p>
+            <p className="text-sm text-neutral-500">
+              Verantwortlich
+            </p>
+
+            <p className="mt-1 text-white">
+              {project.owner}
+            </p>
           </div>
 
           <div>
-            <p className="text-sm text-neutral-500">Fortschritt</p>
-            <p className="mt-1 text-white">{project.progress}%</p>
+            <p className="text-sm text-neutral-500">
+              Fortschritt
+            </p>
+
+            <p className="mt-1 text-white">
+              {project.progress}%
+            </p>
           </div>
         </div>
 
         <div className="mt-8">
           <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-xl font-bold">Projekt-Checkliste</h3>
+            <h3 className="text-xl font-bold">
+              Projekt-Checkliste
+            </h3>
 
             <span className="text-sm text-neutral-400">
-              {completedTasks}/{project.tasks.length} erledigt
+              {completedTasks}/{project.tasks.length}{" "}
+              erledigt
             </span>
           </div>
 
@@ -112,7 +180,12 @@ export default function ProjectDetails({
                 <input
                   type="checkbox"
                   checked={task.completed}
-                  onChange={() => onToggleTask(project.id, task.id)}
+                  onChange={() =>
+                    onToggleTask(
+                      project.id,
+                      task.id
+                    )
+                  }
                 />
 
                 <span
@@ -133,17 +206,22 @@ export default function ProjectDetails({
       <ProjectPhaseTimeline project={project} />
 
       <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
-        <h3 className="text-xl font-bold">Website-Module</h3>
+        <h3 className="text-xl font-bold">
+          Website-Module
+        </h3>
 
         <div className="mt-6 space-y-3">
           {project.modules.map((module) => {
-            const active = selectedModule?.id === module.id;
+            const active =
+              selectedModule?.id === module.id;
 
             return (
               <button
                 type="button"
                 key={module.id}
-                onClick={() => setSelectedModuleId(module.id)}
+                onClick={() =>
+                  setSelectedModuleId(module.id)
+                }
                 className={`w-full rounded-xl border p-4 text-left transition ${
                   active
                     ? "border-white bg-neutral-800"
@@ -151,7 +229,9 @@ export default function ProjectDetails({
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <h4 className="font-semibold">{module.title}</h4>
+                  <h4 className="font-semibold">
+                    {module.title}
+                  </h4>
 
                   <span className="text-sm text-neutral-400">
                     {module.status}
