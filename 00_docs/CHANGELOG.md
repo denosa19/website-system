@@ -1,5 +1,3 @@
-
-```md
 # Changelog
 
 ## Projektbasis
@@ -11,112 +9,150 @@
 - TypeScript eingeführt
 - Tailwind CSS eingeführt
 - App Router verwendet
-- GitHub-Repository eingerichtet
-- Vercel als Deployment-Plattform vorgesehen
-- wiederverwendbare Komponentenstruktur eingeführt
+- GitHub eingerichtet
+- Vercel vorgesehen
+- Komponentenstruktur eingeführt
 
 ---
 
-## Archivierter Entwicklungsverlauf
-
-### OS Foundation
+## OS Foundation
 
 - AppShell erstellt
 - Sidebar erstellt
 - Topbar erstellt
-- zentrale Navigationskonfiguration erstellt
+- zentrale Navigation erstellt
+- aktive Route hervorgehoben
 - Dashboard-Übersicht erstellt
 - UI-Grundkomponenten erstellt
-- Card-Komponente erstellt
-- Badge-Komponente erstellt
 
-### CRM
+---
 
-- Kundentyp erstellt
+## CRM
+
+- Kundendatenmodell erstellt
 - zentrale Kundendaten erstellt
 - Kundenübersicht erstellt
-- Kundenstatus-Badges erstellt
+- Kundenstatus eingeführt
 - Kundenformular erstellt
-- Kunden lokal anlegen
+- Kunden anlegen
 - Kunden suchen
-- Kunden nach Status filtern
-- Kunden lokal löschen
-- Kunden-State in `useCustomers` ausgelagert
+- Kunden filtern
+- Kunden löschen
+- Kundenlogik in `useCustomers` ausgelagert
 
-### Routing und Navigation
+---
 
-Folgende Next.js-App-Router-Routen wurden erstellt:
+## Projektverwaltung
 
-- `/`
-- `/crm`
-- `/projects`
-- `/offers`
-- `/ai`
-- `/seo`
-- `/websites`
-- `/settings`
-
-Zusätzlich umgesetzt:
-
-- Sidebar klickbar
-- aktive Route hervorgehoben
-- zentrale Navigation
-
-### Projektverwaltung
-
-- Projekttyp erstellt
+- Projektdatenmodell erstellt
 - zentrale Projektdaten erstellt
 - Projektübersicht erstellt
-- Projekte lokal anlegen
+- Projekte anlegen
+- Projekte löschen
 - Projekte suchen
-- Projekte nach Status filtern
-- Projekte lokal löschen
-- Fortschritt direkt bearbeiten
-- Status direkt bearbeiten
-- Priorität direkt bearbeiten
+- Projekte filtern
+- Status bearbeiten
+- Priorität bearbeiten
+- Fortschritt bearbeiten
 - Tabellenansicht erstellt
 - Kartenansicht erstellt
 - Projektstatistiken erstellt
 - Empty State erstellt
 - Projekt-Detailvorschau erstellt
 - Projekt-Checkliste erstellt
-- Aufgaben abhaken
+- Projektaufgaben bearbeitbar gemacht
 - Projektphasen erstellt
 - Projekttypen eingeführt
-- Projekte über `customerId` mit Kunden verknüpft
-- projekttypabhängige Projektvorlagen eingeführt
-- neue Projekte erhalten automatisch passende Standardaufgaben
-
-### Website-Automatisierung
-
-- AI-Studio-Prompt-Generator erstellt
-- Prompt-Kopierfunktion erstellt
-- Textdatei-Export erstellt
-- Website Wizard erstellt
-- projektbezogene Website-Module eingeführt
-- Standardmodule erstellt
-- Modul-Workspace erstellt
-- Modul-Auswahl erstellt
-- Modul-Prompt-Generator erstellt
-- Modul-Prompt kopierbar gemacht
-- Modul-Prompt exportierbar gemacht
-- Modul-Dashboard erstellt
-
-### SEO
-
-- SEO-Agent erstellt
-- SEO-Agent nur im SEO-Modul eingeblendet
-- SEO-Prompt erstellt
-- SEO-Prompt kopierbar gemacht
-- SEO-Prompt exportierbar gemacht
-- SEO-Datenmodell erstellt
-- SEO Workspace erstellt
-- SEO-Daten in bestehenden Projekten initialisiert
-- SEO-Daten in neuen Projekten initialisiert
+- Projekte über `customerId` verknüpft
+- projekttypabhängige Vorlagen erstellt
+- automatische Standardaufgaben erstellt
+- stabile Projekt-IDs eingeführt
 
 ---
 
-## Blöcke 1–20
+## Website-Automatisierung
+
+- Website Wizard erstellt
+- AI-Studio-Prompt-Generator erstellt
+- Prompt-Kopierfunktion erstellt
+- Prompt-Export erstellt
+- Projektmodule eingeführt
+- Modul-Workspace erstellt
+- Modul-Dashboard erstellt
+- Modul-Prompt-Generator erstellt
+- Modul-Prompts kopierbar gemacht
+- Modul-Prompts exportierbar gemacht
+
+---
+
+## SEO
+
+- SEO-Datenmodell erstellt
+- SEO-Agent erstellt
+- SEO-Workspace erstellt
+- SEO-Daten bearbeitbar gemacht
+- SEO-Daten persistent gespeichert
+- SEO-Prompt erstellt
+- SEO-Prompt kopierbar gemacht
+- SEO-Prompt exportierbar gemacht
+- SEO-Score erstellt
+- Google-Snippet-Vorschau erstellt
+- Domain-Normalisierung eingeführt
+
+---
+
+## Persistenz und Verlauf
+
+- LocalStorage-Persistenz eingeführt
+- Projektdatenmigration eingeführt
+- Undo eingeführt
+- Redo eingeführt
+- Tastaturkürzel eingeführt
+- Fortschrittsänderungen gruppiert
+- Aktivitätsdatenmodell erstellt
+- Aktivitäten persistent gespeichert
+- Aktivitätsverlauf erstellt
+- Verlaufssuche erstellt
+- Projektfilter erstellt
+- Aktivitätstypfilter erstellt
+- Zeitraumfilter erstellt
+- Datumsgruppen erstellt
+- Verlauf löschbar gemacht
+- CSV-Export erstellt
+
+---
+
+## Datensicherung
+
+- vollständigen Projektstand als JSON exportierbar gemacht
+- versioniertes Backup-Format eingeführt
+- Projekte und Aktivitäten gesichert
+- JSON-Import erstellt
+- Formatprüfung eingeführt
+- Versionsprüfung eingeführt
+- Inhaltsprüfung eingeführt
+- doppelte IDs werden erkannt
+- Import-Vorschau erstellt
+- aktuellen und importierten Stand verglichen
+- automatische Sicherheitssicherung eingeführt
+- kontrollierte Wiederherstellung erstellt
+- Importfehler sichtbar gemacht
+
+---
+
+## Projektarbeitsbereich
+
+### Block 42
+
+- dynamische Route `/projects/[projectId]` erstellt
+- Projekt anhand der ID geladen
+- LocalStorage-Projekte auf der Detailroute geladen
+- Initialprojekte als Fallback verwendet
+- Fehleransicht für ungültige Projekt-IDs erstellt
+- Projektkopf erstellt
+- Projektstatistiken angezeigt
+- Rücknavigation erstellt
+- Button `Projekt öffnen` in der Projektübersicht ergänzt
 
 Status:
 

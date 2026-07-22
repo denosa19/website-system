@@ -6,7 +6,7 @@
 - Branch: `main`
 - Dokumentation: `00_docs`
 - Hauptanwendung: `apps/dashboard`
-- pausierte Website-Engine: `apps/starter`
+- pausierte Anwendung: `apps/starter`
 
 ---
 
