@@ -7,6 +7,44 @@ Der aktuelle Projektstand entspricht:
 ```text
 Release 0.9
 Block 42 abgeschlossen
+```
+
+Die dynamische Projekt-Detailroute ist vorhanden:
+
+```text
+/projects/[projectId]
+```
+
+Ein Projekt kann über seine stabile Projekt-ID geöffnet werden.
+
+Die Route zeigt aktuell:
+
+- Projektname
+- Kunde
+- Projekttyp
+- Status
+- Priorität
+- Fortschritt
+- Deadline
+- Verantwortlicher
+- Aufgabenstatistik
+- Modulstatistik
+- Projekt-ID
+
+Ungültige oder gelöschte Projekte werden kontrolliert behandelt.
+
+---
+
+## Block 43
+
+### Titel
+
+Projektstammdaten auf der Detailroute bearbeiten
+
+### Ziel
+
+Die wichtigsten Stammdaten eines Projekts sollen direkt auf der eigenen Projekt-Detailroute bearbeitet werden können.
+
 ### Geplanter Umfang
 
 Bearbeitbar werden:
@@ -61,6 +99,9 @@ Die Umsetzung soll:
 - Datenbank
 - Authentifizierung
 - Mehrbenutzerbetrieb
+
+---
+
 ### Ergebnis nach Abschluss
 
 Nach Block 43 soll ein Projekt vollständig auf seiner eigenen Detailseite bearbeitet werden können.
