@@ -45,3 +45,29 @@ export function createCommentActivity(
     author,
   });
 }
+
+export function createCommentUpdatedActivity(
+  projectId: string,
+  author = "Dennis"
+): TimelineEvent {
+  return createProjectActivity({
+    projectId,
+    type: "comment_updated",
+    title: "Kommentar bearbeitet",
+    description: `${author} hat einen Kommentar bearbeitet.`,
+    author,
+  });
+}
+
+export function createCommentDeletedActivity(
+  projectId: string,
+  author = "Dennis"
+): TimelineEvent {
+  return createProjectActivity({
+    projectId,
+    type: "comment_deleted",
+    title: "Kommentar gelöscht",
+    description: `${author} hat einen Kommentar gelöscht.`,
+    author,
+  });
+}

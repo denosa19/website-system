@@ -1,6 +1,8 @@
 export type TimelineEventType =
   | "project_created"
   | "comment_added"
+  | "comment_updated"
+  | "comment_deleted"
   | "project_updated"
   | "status_changed"
   | "priority_changed"

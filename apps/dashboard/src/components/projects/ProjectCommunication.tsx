@@ -6,6 +6,10 @@ import {
 } from "react";
 import { comments } from "@/data/comments";
 import { timeline } from "@/data/timeline";
+import {
+  createCommentDeletedActivity,
+  createCommentUpdatedActivity,
+} from "@/lib/projectActivity";
 import type { ProjectComment } from "@/types/comment";
 import type { TimelineEvent } from "@/types/timeline";
 import ProjectComments from "./ProjectComments";
@@ -36,6 +40,8 @@ export default function ProjectCommunication({
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
+    setIsLoaded(false);
+
     const storageKey = getStorageKey(projectId);
     const storedCommunication =
       window.localStorage.getItem(storageKey);
@@ -97,6 +103,15 @@ export default function ProjectCommunication({
     timelineEvents,
   ]);
 
+  function addTimelineEvent(
+    activity: TimelineEvent
+  ) {
+    setTimelineEvents((currentEvents) => [
+      activity,
+      ...currentEvents,
+    ]);
+  }
+
   function handleCommentCreated(
     comment: ProjectComment,
     activity: TimelineEvent
@@ -106,16 +121,15 @@ export default function ProjectCommunication({
       ...currentComments,
     ]);
 
-    setTimelineEvents((currentEvents) => [
-      activity,
-      ...currentEvents,
-    ]);
+    addTimelineEvent(activity);
   }
 
   function handleCommentUpdated(
     commentId: string,
     message: string
   ) {
+    const author = "Dennis";
+
     setProjectComments((currentComments) =>
       currentComments.map((comment) =>
         comment.id === commentId
@@ -127,12 +141,28 @@ export default function ProjectCommunication({
           : comment
       )
     );
+
+    addTimelineEvent(
+      createCommentUpdatedActivity(
+        projectId,
+        author
+      )
+    );
   }
 
   function handleCommentDeleted(commentId: string) {
+    const author = "Dennis";
+
     setProjectComments((currentComments) =>
       currentComments.filter(
         (comment) => comment.id !== commentId
+      )
+    );
+
+    addTimelineEvent(
+      createCommentDeletedActivity(
+        projectId,
+        author
       )
     );
   }

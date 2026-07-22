@@ -19,18 +19,31 @@ function getEventLabel(type: TimelineEventType) {
   switch (type) {
     case "project_created":
       return "Projekt";
+
     case "comment_added":
       return "Kommentar";
+
+    case "comment_updated":
+      return "Kommentar";
+
+    case "comment_deleted":
+      return "Kommentar";
+
     case "project_updated":
       return "Aktualisierung";
+
     case "status_changed":
       return "Status";
+
     case "priority_changed":
       return "Priorität";
+
     case "owner_changed":
       return "Verantwortung";
+
     case "deadline_changed":
       return "Deadline";
+
     default:
       return "Ereignis";
   }
