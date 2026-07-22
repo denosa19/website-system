@@ -1,14 +1,10 @@
-
-`00_docs/ROADMAP.md` — komplett ersetzen
-
-```md
 # Roadmap
 
 ## Grundsatz
 
-Diese Roadmap beschreibt die bestätigte und geplante Entwicklung der Agentur-Software.
+Diese Roadmap beschreibt die bestätigte Entwicklungsrichtung der Agentur-Software.
 
-Die verbindliche aktuelle Aufgabe steht immer in:
+Die verbindliche konkrete Aufgabe steht immer in:
 
 ```text
-NEXT_BLOCK.md
+00_docs/NEXT_BLOCK.md
