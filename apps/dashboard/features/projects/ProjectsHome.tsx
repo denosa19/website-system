@@ -25,6 +25,29 @@ type ProgressActivityGroup = {
 
 const PROGRESS_ACTIVITY_GROUP_TIMEOUT = 1000;
 
+const PROJECT_BACKUP_FORMAT =
+  "internet-firma-project-backup";
+
+const PROJECT_BACKUP_VERSION = 1;
+
+function createBackupFileName() {
+  const now = new Date();
+
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(
+    2,
+    "0"
+  );
+  const day = String(now.getDate()).padStart(2, "0");
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(
+    2,
+    "0"
+  );
+
+  return `internet-firma-backup_${year}-${month}-${day}_${hours}-${minutes}.json`;
+}
+
 export default function ProjectsHome() {
   const [viewMode, setViewMode] =
     useState<ViewMode>("table");
@@ -294,6 +317,47 @@ export default function ProjectsHome() {
     progressActivityGroupsRef.current = {};
   }
 
+  function handleExportBackup() {
+    const exportedAt = new Date().toISOString();
+
+    const backup = {
+      format: PROJECT_BACKUP_FORMAT,
+      version: PROJECT_BACKUP_VERSION,
+      exportedAt,
+      summary: {
+        projects: projects.length,
+        activities: activities.length,
+      },
+      data: {
+        projects,
+        activities,
+      },
+    };
+
+    const jsonContent = JSON.stringify(
+      backup,
+      null,
+      2
+    );
+
+    const blob = new Blob([jsonContent], {
+      type: "application/json;charset=utf-8",
+    });
+
+    const downloadUrl = URL.createObjectURL(blob);
+    const downloadLink =
+      document.createElement("a");
+
+    downloadLink.href = downloadUrl;
+    downloadLink.download = createBackupFileName();
+
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    downloadLink.remove();
+
+    URL.revokeObjectURL(downloadUrl);
+  }
+
   return (
     <section>
       <div className="flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
@@ -309,6 +373,18 @@ export default function ProjectsHome() {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={handleExportBackup}
+            disabled={
+              projects.length === 0 &&
+              activities.length === 0
+            }
+            className="min-h-12 rounded-xl border border-neutral-700 bg-neutral-900 px-4 py-2 text-sm font-medium text-neutral-200 transition hover:border-neutral-500 hover:bg-neutral-800 hover:text-white disabled:cursor-not-allowed disabled:border-neutral-800 disabled:text-neutral-600 disabled:hover:bg-neutral-900"
+          >
+            Datensicherung
+          </button>
+
           <div className="flex items-center rounded-xl border border-neutral-800 bg-neutral-900 p-1">
             <button
               type="button"
@@ -390,6 +466,10 @@ export default function ProjectsHome() {
           <kbd className="rounded border border-neutral-800 bg-neutral-900 px-1.5 py-0.5 font-sans text-neutral-400">
             ⌘ ⇧ Z
           </kbd>
+        </span>
+
+        <span>
+          Sicherung: Projekte und Verlauf als JSON
         </span>
       </div>
 
