@@ -28,6 +28,7 @@ const PROGRESS_ACTIVITY_GROUP_TIMEOUT = 1000;
 export default function ProjectsHome() {
   const [viewMode, setViewMode] =
     useState<ViewMode>("table");
+
   const [selectedProjectId, setSelectedProjectId] =
     useState<string | null>(null);
 
@@ -36,6 +37,7 @@ export default function ProjectsHome() {
   >({});
 
   const {
+    projects,
     filteredProjects,
     search,
     setSearch,
@@ -63,14 +65,14 @@ export default function ProjectsHome() {
 
   const selectedProject = useMemo(
     () =>
-      filteredProjects.find(
+      projects.find(
         (project) => project.id === selectedProjectId
       ) ?? null,
-    [filteredProjects, selectedProjectId]
+    [projects, selectedProjectId]
   );
 
   function findProject(projectId: string) {
-    return filteredProjects.find(
+    return projects.find(
       (project) => project.id === projectId
     );
   }
@@ -78,40 +80,45 @@ export default function ProjectsHome() {
   function handleCreateProject(
     data: Parameters<typeof createProject>[0]
   ) {
-    if (!data.title.trim() || !data.customer.trim()) {
-      createProject(data);
+    const createdProject = createProject(data);
+
+    if (!createdProject) {
       return;
     }
 
-    createProject(data);
     resetActivityGroup();
 
     addActivity({
-      projectId: `created_${Date.now()}`,
-      projectTitle: data.title.trim(),
+      projectId: createdProject.id,
+      projectTitle: createdProject.title,
       action: "project_created",
       title: "Projekt erstellt",
-      description: `Projekt für ${data.customer.trim()} wurde erstellt.`,
-      user: data.owner.trim() || "Dennis",
+      description: `Projekt für ${createdProject.customer} wurde erstellt.`,
+      user: createdProject.owner,
     });
+
+    setSelectedProjectId(createdProject.id);
   }
 
   function handleDeleteProject(projectId: string) {
     const project = findProject(projectId);
 
+    if (!project) {
+      return;
+    }
+
     deleteProject(projectId);
     resetActivityGroup();
 
-    if (project) {
-      addActivity({
-        projectId: project.id,
-        projectTitle: project.title,
-        action: "project_deleted",
-        title: "Projekt gelöscht",
-        description: `Das Projekt wurde aus der Projektverwaltung entfernt.`,
-        user: project.owner,
-      });
-    }
+    addActivity({
+      projectId: project.id,
+      projectTitle: project.title,
+      action: "project_deleted",
+      title: "Projekt gelöscht",
+      description:
+        "Das Projekt wurde aus der Projektverwaltung entfernt.",
+      user: project.owner,
+    });
 
     if (selectedProjectId === projectId) {
       setSelectedProjectId(null);
@@ -125,7 +132,6 @@ export default function ProjectsHome() {
     const project = findProject(projectId);
 
     if (!project) {
-      updateProjectProgress(projectId, progress);
       return;
     }
 
@@ -139,6 +145,7 @@ export default function ProjectsHome() {
     }
 
     const now = Date.now();
+
     const activeGroup =
       progressActivityGroupsRef.current[projectId];
 
@@ -224,6 +231,7 @@ export default function ProjectsHome() {
     taskId: string
   ) {
     const project = findProject(projectId);
+
     const task = project?.tasks.find(
       (projectTask) => projectTask.id === taskId
     );
