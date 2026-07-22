@@ -1,0 +1,18 @@
+export type TimelineEventType =
+  | "project_created"
+  | "comment_added"
+  | "project_updated"
+  | "status_changed"
+  | "priority_changed"
+  | "owner_changed"
+  | "deadline_changed";
+
+export interface TimelineEvent {
+  id: string;
+  projectId: string;
+  type: TimelineEventType;
+  title: string;
+  description?: string;
+  author: string;
+  createdAt: string;
+}
