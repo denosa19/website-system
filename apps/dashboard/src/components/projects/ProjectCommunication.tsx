@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { comments } from "@/data/comments";
 import { timeline } from "@/data/timeline";
+import type { ProjectComment } from "@/types/comment";
 import type { TimelineEvent } from "@/types/timeline";
 import ProjectComments from "./ProjectComments";
 import ProjectTimeline from "./ProjectTimeline";
@@ -14,12 +15,21 @@ type ProjectCommunicationProps = {
 export default function ProjectCommunication({
   projectId,
 }: ProjectCommunicationProps) {
+  const [projectComments, setProjectComments] =
+    useState<ProjectComment[]>(comments);
+
   const [timelineEvents, setTimelineEvents] =
     useState<TimelineEvent[]>(timeline);
 
-  function handleActivityCreated(
+  function handleCommentCreated(
+    comment: ProjectComment,
     activity: TimelineEvent
   ) {
+    setProjectComments((currentComments) => [
+      comment,
+      ...currentComments,
+    ]);
+
     setTimelineEvents((currentEvents) => [
       activity,
       ...currentEvents,
@@ -30,8 +40,8 @@ export default function ProjectCommunication({
     <div className="grid gap-6 xl:grid-cols-2">
       <ProjectComments
         projectId={projectId}
-        initialComments={comments}
-        onActivityCreated={handleActivityCreated}
+        comments={projectComments}
+        onCommentCreated={handleCommentCreated}
       />
 
       <ProjectTimeline

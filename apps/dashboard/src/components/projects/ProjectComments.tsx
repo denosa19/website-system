@@ -11,8 +11,9 @@ import type { TimelineEvent } from "@/types/timeline";
 
 type ProjectCommentsProps = {
   projectId: string;
-  initialComments: ProjectComment[];
-  onActivityCreated: (
+  comments: ProjectComment[];
+  onCommentCreated: (
+    comment: ProjectComment,
     activity: TimelineEvent
   ) => void;
 };
@@ -26,12 +27,9 @@ function formatCommentDate(date: string) {
 
 export default function ProjectComments({
   projectId,
-  initialComments,
-  onActivityCreated,
+  comments,
+  onCommentCreated,
 }: ProjectCommentsProps) {
-  const [comments, setComments] =
-    useState<ProjectComment[]>(initialComments);
-
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -66,13 +64,14 @@ export default function ProjectComments({
     }
 
     const author = "Dennis";
+    const createdAt = new Date().toISOString();
 
     const newComment: ProjectComment = {
       id: `comment_${Date.now()}`,
       projectId,
       author,
       message: trimmedMessage,
-      createdAt: new Date().toISOString(),
+      createdAt,
     };
 
     const commentActivity = createCommentActivity(
@@ -80,12 +79,10 @@ export default function ProjectComments({
       author
     );
 
-    setComments((currentComments) => [
+    onCommentCreated(
       newComment,
-      ...currentComments,
-    ]);
-
-    onActivityCreated(commentActivity);
+      commentActivity
+    );
 
     setMessage("");
     setError("");
