@@ -6,96 +6,71 @@ Alle relevanten Änderungen am Projekt werden hier dokumentiert.
 
 ---
 
-# Block 43
+# Block 44
 
 Status:
 Abgeschlossen
 
 ## Neue Funktion
 
-Projektstammdaten können direkt auf der Projektdetailseite bearbeitet werden.
+Projekte besitzen jetzt einen eigenen Kommunikationsbereich auf der Projektdetailseite.
 
 ## Hinzugefügt
 
-- Bearbeitungsmodus
-- Speichern
-- Abbrechen
-- Formularvalidierung
-- Aktualisierung der Projektdaten
+- Projektkommentare
+- Projekt-Timeline
+- Automatische Aktivitätseinträge
+- Gemeinsame Verwaltung von Kommentaren und Aktivitäten
+- Projektbezogene lokale Speicherung
+- Chronologische Sortierung
+- Zeitstempel
+- Benutzerzuordnung
+- Kommentarvalidierung
+- Leere Zustände
+- Kommentar- und Ereigniszähler
 
-## Bearbeitbare Felder
+## Kommentare
 
-- Projekttitel
-- Kunde
-- Status
-- Priorität
-- Besitzer
-- Deadline
+Kommentare können direkt innerhalb eines Projekts hinzugefügt werden.
 
-## Architektur
+Jeder Kommentar besitzt:
 
-- Bestehende Komponenten wiederverwendet
-- Keine Doppelentwicklung
-- Bestehender Datenfluss beibehalten
+- Projektzuordnung
+- Autor
+- Inhalt
+- Erstellungszeitpunkt
+- optionalen Bearbeitungszeitpunkt
 
----
+Beim Hinzufügen eines Kommentars wird automatisch ein passender Timeline-Eintrag erzeugt.
 
-# Block 42
+## Timeline
 
-Status:
-Abgeschlossen
+Die Timeline stellt den bisherigen Projektverlauf chronologisch dar.
 
-Projektübersicht erweitert und stabilisiert.
+Unterstützte Ereignistypen:
 
----
+- Projekt erstellt
+- Kommentar hinzugefügt
+- Projekt aktualisiert
+- Status geändert
+- Priorität geändert
+- Besitzer geändert
+- Deadline geändert
 
-# Block 41
+Jeder Timeline-Eintrag besitzt:
 
-Status:
-Abgeschlossen
+- Projektzuordnung
+- Ereignistyp
+- Titel
+- optionale Beschreibung
+- Benutzer
+- Datum und Uhrzeit
 
-Aufgabenverwaltung erweitert.
+## Aktivitäts-Engine
 
----
+Eine zentrale Aktivitäts-Engine wurde eingeführt.
 
-# Block 40
+Datei:
 
-Status:
-Abgeschlossen
-
-Projektdetailseite eingeführt.
-
----
-
-# Frühere Blöcke
-
-In den vorherigen Entwicklungsblöcken wurden die Grundarchitektur und die Kernmodule aufgebaut.
-
-Hierzu gehören:
-
-- Dashboard
-- Kundenverwaltung
-- Projektverwaltung
-- Aufgabenverwaltung
-- UI-Komponenten
-- Datenmodelle
-- Routing
-- Theme-System
-- Layoutsystem
-
----
-
-# Version 0.1
-
-Aktueller Entwicklungsstand:
-
-- Dashboard funktionsfähig
-- Kundenverwaltung vorhanden
-- Projektverwaltung vorhanden
-- Aufgabenverwaltung vorhanden
-- Projektdetailseite vorhanden
-- Projektbearbeitung vorhanden
-
-Projektstatus:
-
-Aktive Entwicklung.
+```text
+apps/dashboard/src/lib/projectActivity.ts
