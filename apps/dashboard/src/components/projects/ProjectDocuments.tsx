@@ -5,10 +5,14 @@ import {
   getDocumentCategoryLabel,
 } from "@/lib/projectDocuments";
 import type { ProjectDocument } from "@/types/document";
+import ProjectDocumentUpload from "./ProjectDocumentUpload";
 
 type ProjectDocumentsProps = {
   projectId: string;
   documents: ProjectDocument[];
+  onDocumentCreated: (
+    document: ProjectDocument
+  ) => void;
 };
 
 function formatDocumentDate(date: string) {
@@ -21,6 +25,7 @@ function formatDocumentDate(date: string) {
 export default function ProjectDocuments({
   projectId,
   documents,
+  onDocumentCreated,
 }: ProjectDocumentsProps) {
   const projectDocuments = documents
     .filter(
@@ -59,6 +64,13 @@ export default function ProjectDocuments({
       </div>
 
       <div className="mt-8">
+        <ProjectDocumentUpload
+          projectId={projectId}
+          onDocumentCreated={onDocumentCreated}
+        />
+      </div>
+
+      <div className="mt-6">
         {projectDocuments.length === 0 ? (
           <div className="rounded-xl border border-dashed border-neutral-700 bg-neutral-950 px-5 py-10 text-center">
             <p className="text-sm text-neutral-500">
@@ -86,13 +98,17 @@ export default function ProjectDocuments({
                         )}
                       </span>
 
-                      <span aria-hidden="true">•</span>
+                      <span aria-hidden="true">
+                        •
+                      </span>
 
                       <span>
                         {formatFileSize(document.size)}
                       </span>
 
-                      <span aria-hidden="true">•</span>
+                      <span aria-hidden="true">
+                        •
+                      </span>
 
                       <time
                         dateTime={document.uploadedAt}

@@ -263,6 +263,15 @@ export default function ProjectCommunication({
     );
   }
 
+  function handleDocumentCreated(
+    document: ProjectDocument
+  ) {
+    setProjectDocuments((currentDocuments) => [
+      document,
+      ...currentDocuments,
+    ]);
+  }
+
   return (
     <div className="space-y-6">
       <div className="grid gap-6 xl:grid-cols-2">
@@ -286,6 +295,7 @@ export default function ProjectCommunication({
       <ProjectDocuments
         projectId={projectId}
         documents={projectDocuments}
+        onDocumentCreated={handleDocumentCreated}
       />
 
       <ProjectTimeline
