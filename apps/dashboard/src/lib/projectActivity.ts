@@ -71,3 +71,42 @@ export function createCommentDeletedActivity(
     author,
   });
 }
+
+export function createNoteAddedActivity(
+  projectId: string,
+  author = "Dennis"
+): TimelineEvent {
+  return createProjectActivity({
+    projectId,
+    type: "note_added",
+    title: "Projektnotiz hinzugefügt",
+    description: `${author} hat eine neue Projektnotiz hinzugefügt.`,
+    author,
+  });
+}
+
+export function createNoteUpdatedActivity(
+  projectId: string,
+  author = "Dennis"
+): TimelineEvent {
+  return createProjectActivity({
+    projectId,
+    type: "note_updated",
+    title: "Projektnotiz bearbeitet",
+    description: `${author} hat eine Projektnotiz bearbeitet.`,
+    author,
+  });
+}
+
+export function createNoteDeletedActivity(
+  projectId: string,
+  author = "Dennis"
+): TimelineEvent {
+  return createProjectActivity({
+    projectId,
+    type: "note_deleted",
+    title: "Projektnotiz gelöscht",
+    description: `${author} hat eine Projektnotiz gelöscht.`,
+    author,
+  });
+}

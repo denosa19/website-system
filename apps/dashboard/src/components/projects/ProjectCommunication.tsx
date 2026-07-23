@@ -10,6 +10,9 @@ import { timeline } from "@/data/timeline";
 import {
   createCommentDeletedActivity,
   createCommentUpdatedActivity,
+  createNoteAddedActivity,
+  createNoteDeletedActivity,
+  createNoteUpdatedActivity,
 } from "@/lib/projectActivity";
 import type { ProjectComment } from "@/types/comment";
 import type { ProjectNote } from "@/types/note";
@@ -189,12 +192,21 @@ export default function ProjectCommunication({
       note,
       ...currentNotes,
     ]);
+
+    addTimelineEvent(
+      createNoteAddedActivity(
+        projectId,
+        note.author
+      )
+    );
   }
 
   function handleNoteUpdated(
     noteId: string,
     content: string
   ) {
+    const author = "Dennis";
+
     setProjectNotes((currentNotes) =>
       currentNotes.map((note) =>
         note.id === noteId
@@ -206,12 +218,28 @@ export default function ProjectCommunication({
           : note
       )
     );
+
+    addTimelineEvent(
+      createNoteUpdatedActivity(
+        projectId,
+        author
+      )
+    );
   }
 
   function handleNoteDeleted(noteId: string) {
+    const author = "Dennis";
+
     setProjectNotes((currentNotes) =>
       currentNotes.filter(
         (note) => note.id !== noteId
+      )
+    );
+
+    addTimelineEvent(
+      createNoteDeletedActivity(
+        projectId,
+        author
       )
     );
   }

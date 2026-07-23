@@ -21,13 +21,14 @@ function getEventLabel(type: TimelineEventType) {
       return "Projekt";
 
     case "comment_added":
-      return "Kommentar";
-
     case "comment_updated":
-      return "Kommentar";
-
     case "comment_deleted":
       return "Kommentar";
+
+    case "note_added":
+    case "note_updated":
+    case "note_deleted":
+      return "Notiz";
 
     case "project_updated":
       return "Aktualisierung";
