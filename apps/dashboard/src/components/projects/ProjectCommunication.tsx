@@ -5,14 +5,17 @@ import {
   useState,
 } from "react";
 import { comments } from "@/data/comments";
+import { notes } from "@/data/notes";
 import { timeline } from "@/data/timeline";
 import {
   createCommentDeletedActivity,
   createCommentUpdatedActivity,
 } from "@/lib/projectActivity";
 import type { ProjectComment } from "@/types/comment";
+import type { ProjectNote } from "@/types/note";
 import type { TimelineEvent } from "@/types/timeline";
 import ProjectComments from "./ProjectComments";
+import ProjectNotes from "./ProjectNotes";
 import ProjectTimeline from "./ProjectTimeline";
 
 type ProjectCommunicationProps = {
@@ -21,6 +24,7 @@ type ProjectCommunicationProps = {
 
 type StoredProjectCommunication = {
   comments: ProjectComment[];
+  notes: ProjectNote[];
   timelineEvents: TimelineEvent[];
 };
 
@@ -33,6 +37,9 @@ export default function ProjectCommunication({
 }: ProjectCommunicationProps) {
   const [projectComments, setProjectComments] =
     useState<ProjectComment[]>(comments);
+
+  const [projectNotes, setProjectNotes] =
+    useState<ProjectNote[]>(notes);
 
   const [timelineEvents, setTimelineEvents] =
     useState<TimelineEvent[]>(timeline);
@@ -48,6 +55,7 @@ export default function ProjectCommunication({
 
     if (!storedCommunication) {
       setProjectComments(comments);
+      setProjectNotes(notes);
       setTimelineEvents(timeline);
       setIsLoaded(true);
       return;
@@ -57,12 +65,18 @@ export default function ProjectCommunication({
       const parsedCommunication =
         JSON.parse(
           storedCommunication
-        ) as StoredProjectCommunication;
+        ) as Partial<StoredProjectCommunication>;
 
       setProjectComments(
         Array.isArray(parsedCommunication.comments)
           ? parsedCommunication.comments
           : comments
+      );
+
+      setProjectNotes(
+        Array.isArray(parsedCommunication.notes)
+          ? parsedCommunication.notes
+          : notes
       );
 
       setTimelineEvents(
@@ -74,6 +88,7 @@ export default function ProjectCommunication({
       );
     } catch {
       setProjectComments(comments);
+      setProjectNotes(notes);
       setTimelineEvents(timeline);
     }
 
@@ -89,6 +104,7 @@ export default function ProjectCommunication({
 
     const communicationToStore: StoredProjectCommunication = {
       comments: projectComments,
+      notes: projectNotes,
       timelineEvents,
     };
 
@@ -100,6 +116,7 @@ export default function ProjectCommunication({
     isLoaded,
     projectComments,
     projectId,
+    projectNotes,
     timelineEvents,
   ]);
 
@@ -167,15 +184,57 @@ export default function ProjectCommunication({
     );
   }
 
+  function handleNoteCreated(note: ProjectNote) {
+    setProjectNotes((currentNotes) => [
+      note,
+      ...currentNotes,
+    ]);
+  }
+
+  function handleNoteUpdated(
+    noteId: string,
+    content: string
+  ) {
+    setProjectNotes((currentNotes) =>
+      currentNotes.map((note) =>
+        note.id === noteId
+          ? {
+              ...note,
+              content,
+              updatedAt: new Date().toISOString(),
+            }
+          : note
+      )
+    );
+  }
+
+  function handleNoteDeleted(noteId: string) {
+    setProjectNotes((currentNotes) =>
+      currentNotes.filter(
+        (note) => note.id !== noteId
+      )
+    );
+  }
+
   return (
-    <div className="grid gap-6 xl:grid-cols-2">
-      <ProjectComments
-        projectId={projectId}
-        comments={projectComments}
-        onCommentCreated={handleCommentCreated}
-        onCommentUpdated={handleCommentUpdated}
-        onCommentDeleted={handleCommentDeleted}
-      />
+    <div className="space-y-6">
+      <div className="grid gap-6 xl:grid-cols-2">
+        <ProjectComments
+          projectId={projectId}
+          comments={projectComments}
+          onCommentCreated={handleCommentCreated}
+          onCommentUpdated={handleCommentUpdated}
+          onCommentDeleted={handleCommentDeleted}
+        />
+
+        <ProjectNotes
+          projectId={projectId}
+          notes={projectNotes}
+          onNoteCreated={handleNoteCreated}
+          onNoteUpdated={handleNoteUpdated}
+          onNoteDeleted={handleNoteDeleted}
+        />
+      </div>
 
       <ProjectTimeline
         projectId={projectId}
