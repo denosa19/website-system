@@ -1,17 +1,17 @@
 "use client";
 
-import type { ProjectDocument } from "@/types/document";
 import {
   formatFileSize,
   getDocumentCategoryLabel,
 } from "@/lib/projectDocuments";
+import type { ProjectDocument } from "@/types/document";
 
 type ProjectDocumentsProps = {
   projectId: string;
   documents: ProjectDocument[];
 };
 
-function formatDate(date: string) {
+function formatDocumentDate(date: string) {
   return new Intl.DateTimeFormat("de-DE", {
     dateStyle: "medium",
     timeStyle: "short",
@@ -28,17 +28,21 @@ export default function ProjectDocuments({
         document.projectId === projectId
     )
     .sort(
-      (a, b) =>
-        new Date(b.uploadedAt).getTime() -
-        new Date(a.uploadedAt).getTime()
+      (firstDocument, secondDocument) =>
+        new Date(
+          secondDocument.uploadedAt
+        ).getTime() -
+        new Date(
+          firstDocument.uploadedAt
+        ).getTime()
     );
 
   return (
     <section className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm uppercase tracking-[0.14em] text-neutral-500">
-            Dateien
+          <p className="text-sm font-medium uppercase tracking-[0.14em] text-neutral-500">
+            Projektdateien
           </p>
 
           <h2 className="mt-2 text-2xl font-bold text-white">
@@ -46,65 +50,73 @@ export default function ProjectDocuments({
           </h2>
         </div>
 
-        <span className="rounded-full border border-neutral-700 px-3 py-1 text-xs text-neutral-400">
-          {projectDocuments.length}
+        <span className="w-fit rounded-full border border-neutral-700 px-3 py-1 text-xs text-neutral-400">
+          {projectDocuments.length}{" "}
+          {projectDocuments.length === 1
+            ? "Dokument"
+            : "Dokumente"}
         </span>
       </div>
 
       <div className="mt-8">
         {projectDocuments.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-neutral-700 bg-neutral-950 py-10 text-center">
-            <p className="text-neutral-500">
-              Noch keine Dokumente vorhanden.
+          <div className="rounded-xl border border-dashed border-neutral-700 bg-neutral-950 px-5 py-10 text-center">
+            <p className="text-sm text-neutral-500">
+              Für dieses Projekt wurden noch keine
+              Dokumente hinterlegt.
             </p>
           </div>
         ) : (
           <div className="space-y-3">
-            {projectDocuments.map(
-              (document) => (
-                <article
-                  key={document.id}
-                  className="rounded-xl border border-neutral-800 bg-neutral-950 p-5"
-                >
-                  <div className="flex items-start justify-between gap-6">
-                    <div>
-                      <h3 className="font-semibold text-white">
-                        {document.originalName}
-                      </h3>
+            {projectDocuments.map((document) => (
+              <article
+                key={document.id}
+                className="rounded-xl border border-neutral-800 bg-neutral-950 p-5"
+              >
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0">
+                    <h3 className="break-words font-semibold text-white">
+                      {document.name}
+                    </h3>
 
-                      <div className="mt-2 flex flex-wrap gap-2 text-xs text-neutral-500">
-                        <span>
-                          {getDocumentCategoryLabel(
-                            document.category
-                          )}
-                        </span>
+                    <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-neutral-500">
+                      <span>
+                        {getDocumentCategoryLabel(
+                          document.category
+                        )}
+                      </span>
 
-                        <span>•</span>
+                      <span aria-hidden="true">•</span>
 
-                        <span>
-                          {formatFileSize(
-                            document.size
-                          )}
-                        </span>
+                      <span>
+                        {formatFileSize(document.size)}
+                      </span>
 
-                        <span>•</span>
+                      <span aria-hidden="true">•</span>
 
-                        <span>
-                          {formatDate(
-                            document.uploadedAt
-                          )}
-                        </span>
-                      </div>
-
-                      <p className="mt-2 text-sm text-neutral-400">
-                        Hochgeladen von{" "}
-                        {document.uploadedBy}
-                      </p>
+                      <time
+                        dateTime={document.uploadedAt}
+                      >
+                        {formatDocumentDate(
+                          document.uploadedAt
+                        )}
+                      </time>
                     </div>
+
+                    <p className="mt-3 text-sm text-neutral-400">
+                      Hochgeladen von{" "}
+                      {document.uploadedBy}
+                    </p>
                   </div>
-                </article>
-              )
-            )}
+
+                  <span className="w-fit shrink-0 rounded-full border border-neutral-700 px-3 py-1 text-xs font-medium text-neutral-400">
+                    {getDocumentCategoryLabel(
+                      document.category
+                    )}
+                  </span>
+                </div>
+              </article>
+            ))}
           </div>
         )}
       </div>

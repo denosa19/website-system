@@ -5,6 +5,7 @@ import {
   useState,
 } from "react";
 import { comments } from "@/data/comments";
+import { documents } from "@/data/documents";
 import { notes } from "@/data/notes";
 import { timeline } from "@/data/timeline";
 import {
@@ -15,9 +16,11 @@ import {
   createNoteUpdatedActivity,
 } from "@/lib/projectActivity";
 import type { ProjectComment } from "@/types/comment";
+import type { ProjectDocument } from "@/types/document";
 import type { ProjectNote } from "@/types/note";
 import type { TimelineEvent } from "@/types/timeline";
 import ProjectComments from "./ProjectComments";
+import ProjectDocuments from "./ProjectDocuments";
 import ProjectNotes from "./ProjectNotes";
 import ProjectTimeline from "./ProjectTimeline";
 
@@ -28,6 +31,7 @@ type ProjectCommunicationProps = {
 type StoredProjectCommunication = {
   comments: ProjectComment[];
   notes: ProjectNote[];
+  documents: ProjectDocument[];
   timelineEvents: TimelineEvent[];
 };
 
@@ -44,6 +48,9 @@ export default function ProjectCommunication({
   const [projectNotes, setProjectNotes] =
     useState<ProjectNote[]>(notes);
 
+  const [projectDocuments, setProjectDocuments] =
+    useState<ProjectDocument[]>(documents);
+
   const [timelineEvents, setTimelineEvents] =
     useState<TimelineEvent[]>(timeline);
 
@@ -59,6 +66,7 @@ export default function ProjectCommunication({
     if (!storedCommunication) {
       setProjectComments(comments);
       setProjectNotes(notes);
+      setProjectDocuments(documents);
       setTimelineEvents(timeline);
       setIsLoaded(true);
       return;
@@ -82,6 +90,14 @@ export default function ProjectCommunication({
           : notes
       );
 
+      setProjectDocuments(
+        Array.isArray(
+          parsedCommunication.documents
+        )
+          ? parsedCommunication.documents
+          : documents
+      );
+
       setTimelineEvents(
         Array.isArray(
           parsedCommunication.timelineEvents
@@ -92,6 +108,7 @@ export default function ProjectCommunication({
     } catch {
       setProjectComments(comments);
       setProjectNotes(notes);
+      setProjectDocuments(documents);
       setTimelineEvents(timeline);
     }
 
@@ -108,6 +125,7 @@ export default function ProjectCommunication({
     const communicationToStore: StoredProjectCommunication = {
       comments: projectComments,
       notes: projectNotes,
+      documents: projectDocuments,
       timelineEvents,
     };
 
@@ -118,6 +136,7 @@ export default function ProjectCommunication({
   }, [
     isLoaded,
     projectComments,
+    projectDocuments,
     projectId,
     projectNotes,
     timelineEvents,
@@ -263,6 +282,11 @@ export default function ProjectCommunication({
           onNoteDeleted={handleNoteDeleted}
         />
       </div>
+
+      <ProjectDocuments
+        projectId={projectId}
+        documents={projectDocuments}
+      />
 
       <ProjectTimeline
         projectId={projectId}
