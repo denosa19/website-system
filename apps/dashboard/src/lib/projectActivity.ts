@@ -110,3 +110,17 @@ export function createNoteDeletedActivity(
     author,
   });
 }
+
+export function createDocumentAddedActivity(
+  projectId: string,
+  fileName: string,
+  author = "Dennis"
+): TimelineEvent {
+  return createProjectActivity({
+    projectId,
+    type: "document_added",
+    title: "Dokument hinzugefügt",
+    description: `${author} hat das Dokument „${fileName}“ hinzugefügt.`,
+    author,
+  });
+}

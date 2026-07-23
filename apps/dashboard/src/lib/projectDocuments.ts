@@ -39,7 +39,10 @@ export function getFileExtension(
     .pop()
     ?.toLowerCase();
 
-  if (!extension || extension === fileName.toLowerCase()) {
+  if (
+    !extension ||
+    extension === fileName.toLowerCase()
+  ) {
     return "";
   }
 
@@ -90,7 +93,10 @@ export function getDocumentCategoryLabel(
 export function formatFileSize(
   sizeInBytes: number
 ): string {
-  if (!Number.isFinite(sizeInBytes) || sizeInBytes <= 0) {
+  if (
+    !Number.isFinite(sizeInBytes) ||
+    sizeInBytes <= 0
+  ) {
     return "0 Byte";
   }
 
@@ -122,6 +128,7 @@ export function formatFileSize(
 export function createProjectDocument(
   projectId: string,
   file: File,
+  storageKey: string,
   uploadedBy = "Dennis"
 ): ProjectDocument {
   const uploadedAt = new Date().toISOString();
@@ -139,12 +146,14 @@ export function createProjectDocument(
     size: file.size,
     uploadedBy,
     uploadedAt,
-    storageKey: undefined,
+    storageKey,
   };
 }
 
 export function isSupportedDocument(
   fileName: string
 ): boolean {
-  return getDocumentCategory(fileName) !== "other";
+  return (
+    getDocumentCategory(fileName) !== "other"
+  );
 }

@@ -11,6 +11,7 @@ import { timeline } from "@/data/timeline";
 import {
   createCommentDeletedActivity,
   createCommentUpdatedActivity,
+  createDocumentAddedActivity,
   createNoteAddedActivity,
   createNoteDeletedActivity,
   createNoteUpdatedActivity,
@@ -60,6 +61,7 @@ export default function ProjectCommunication({
     setIsLoaded(false);
 
     const storageKey = getStorageKey(projectId);
+
     const storedCommunication =
       window.localStorage.getItem(storageKey);
 
@@ -79,13 +81,17 @@ export default function ProjectCommunication({
         ) as Partial<StoredProjectCommunication>;
 
       setProjectComments(
-        Array.isArray(parsedCommunication.comments)
+        Array.isArray(
+          parsedCommunication.comments
+        )
           ? parsedCommunication.comments
           : comments
       );
 
       setProjectNotes(
-        Array.isArray(parsedCommunication.notes)
+        Array.isArray(
+          parsedCommunication.notes
+        )
           ? parsedCommunication.notes
           : notes
       );
@@ -122,12 +128,13 @@ export default function ProjectCommunication({
 
     const storageKey = getStorageKey(projectId);
 
-    const communicationToStore: StoredProjectCommunication = {
-      comments: projectComments,
-      notes: projectNotes,
-      documents: projectDocuments,
-      timelineEvents,
-    };
+    const communicationToStore: StoredProjectCommunication =
+      {
+        comments: projectComments,
+        notes: projectNotes,
+        documents: projectDocuments,
+        timelineEvents,
+      };
 
     window.localStorage.setItem(
       storageKey,
@@ -175,7 +182,8 @@ export default function ProjectCommunication({
           ? {
               ...comment,
               message,
-              updatedAt: new Date().toISOString(),
+              updatedAt:
+                new Date().toISOString(),
             }
           : comment
       )
@@ -189,12 +197,15 @@ export default function ProjectCommunication({
     );
   }
 
-  function handleCommentDeleted(commentId: string) {
+  function handleCommentDeleted(
+    commentId: string
+  ) {
     const author = "Dennis";
 
     setProjectComments((currentComments) =>
       currentComments.filter(
-        (comment) => comment.id !== commentId
+        (comment) =>
+          comment.id !== commentId
       )
     );
 
@@ -206,7 +217,9 @@ export default function ProjectCommunication({
     );
   }
 
-  function handleNoteCreated(note: ProjectNote) {
+  function handleNoteCreated(
+    note: ProjectNote
+  ) {
     setProjectNotes((currentNotes) => [
       note,
       ...currentNotes,
@@ -232,7 +245,8 @@ export default function ProjectCommunication({
           ? {
               ...note,
               content,
-              updatedAt: new Date().toISOString(),
+              updatedAt:
+                new Date().toISOString(),
             }
           : note
       )
@@ -266,10 +280,20 @@ export default function ProjectCommunication({
   function handleDocumentCreated(
     document: ProjectDocument
   ) {
-    setProjectDocuments((currentDocuments) => [
-      document,
-      ...currentDocuments,
-    ]);
+    setProjectDocuments(
+      (currentDocuments) => [
+        document,
+        ...currentDocuments,
+      ]
+    );
+
+    addTimelineEvent(
+      createDocumentAddedActivity(
+        projectId,
+        document.name,
+        document.uploadedBy
+      )
+    );
   }
 
   return (
@@ -278,9 +302,15 @@ export default function ProjectCommunication({
         <ProjectComments
           projectId={projectId}
           comments={projectComments}
-          onCommentCreated={handleCommentCreated}
-          onCommentUpdated={handleCommentUpdated}
-          onCommentDeleted={handleCommentDeleted}
+          onCommentCreated={
+            handleCommentCreated
+          }
+          onCommentUpdated={
+            handleCommentUpdated
+          }
+          onCommentDeleted={
+            handleCommentDeleted
+          }
         />
 
         <ProjectNotes
@@ -295,7 +325,9 @@ export default function ProjectCommunication({
       <ProjectDocuments
         projectId={projectId}
         documents={projectDocuments}
-        onDocumentCreated={handleDocumentCreated}
+        onDocumentCreated={
+          handleDocumentCreated
+        }
       />
 
       <ProjectTimeline

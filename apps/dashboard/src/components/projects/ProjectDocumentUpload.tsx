@@ -1,10 +1,11 @@
 "use client";
 
 import {
-  ChangeEvent,
+  type ChangeEvent,
   useRef,
   useState,
 } from "react";
+import { documentStorage } from "@/lib/documentStorage";
 import {
   createProjectDocument,
   formatFileSize,
@@ -57,6 +58,9 @@ export default function ProjectDocumentUpload({
   const [successMessage, setSuccessMessage] =
     useState("");
 
+  const [isUploading, setIsUploading] =
+    useState(false);
+
   function resetMessages() {
     setErrorMessage("");
     setSuccessMessage("");
@@ -101,7 +105,8 @@ export default function ProjectDocumentUpload({
       return;
     }
 
-    const validationError = validateFile(file);
+    const validationError =
+      validateFile(file);
 
     if (validationError) {
       setErrorMessage(validationError);
@@ -112,7 +117,7 @@ export default function ProjectDocumentUpload({
     setSelectedFile(file);
   }
 
-  function handleDocumentUpload() {
+  async function handleDocumentUpload() {
     resetMessages();
 
     if (!selectedFile) {
@@ -130,18 +135,38 @@ export default function ProjectDocumentUpload({
       return;
     }
 
-    const document = createProjectDocument(
-      projectId,
-      selectedFile
-    );
+    setIsUploading(true);
 
-    onDocumentCreated(document);
+    try {
+      const storageKey =
+        await documentStorage.saveFile(
+          selectedFile,
+          projectId
+        );
 
-    setSuccessMessage(
-      `"${selectedFile.name}" wurde dem Projekt hinzugefügt.`
-    );
+      const document = createProjectDocument(
+        projectId,
+        selectedFile,
+        storageKey
+      );
 
-    resetFileSelection();
+      onDocumentCreated(document);
+
+      setSuccessMessage(
+        `„${selectedFile.name}“ wurde gespeichert und dem Projekt hinzugefügt.`
+      );
+
+      resetFileSelection();
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Die Datei konnte nicht gespeichert werden.";
+
+      setErrorMessage(message);
+    } finally {
+      setIsUploading(false);
+    }
   }
 
   return (
@@ -152,9 +177,9 @@ export default function ProjectDocumentUpload({
         </h3>
 
         <p className="mt-2 text-sm leading-6 text-neutral-400">
-          Wähle eine unterstützte Datei aus. In
-          dieser Entwicklungsstufe werden nur die
-          Dateiinformationen gespeichert.
+          Die Datei wird lokal im Browser
+          gespeichert und bleibt auch nach dem
+          Neuladen verfügbar.
         </p>
       </div>
 
@@ -164,7 +189,8 @@ export default function ProjectDocumentUpload({
           type="file"
           accept={ACCEPTED_FILE_TYPES}
           onChange={handleFileChange}
-          className="block w-full cursor-pointer rounded-lg border border-neutral-700 bg-neutral-900 text-sm text-neutral-400 file:mr-4 file:cursor-pointer file:border-0 file:bg-neutral-800 file:px-4 file:py-3 file:text-sm file:font-medium file:text-white hover:file:bg-neutral-700"
+          disabled={isUploading}
+          className="block w-full cursor-pointer rounded-lg border border-neutral-700 bg-neutral-900 text-sm text-neutral-400 file:mr-4 file:cursor-pointer file:border-0 file:bg-neutral-800 file:px-4 file:py-3 file:text-sm file:font-medium file:text-white hover:file:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-60"
         />
       </div>
 
@@ -202,10 +228,14 @@ export default function ProjectDocumentUpload({
         <button
           type="button"
           onClick={handleDocumentUpload}
-          disabled={!selectedFile}
+          disabled={
+            !selectedFile || isUploading
+          }
           className="rounded-lg bg-white px-4 py-3 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500"
         >
-          Dokument hinzufügen
+          {isUploading
+            ? "Datei wird gespeichert..."
+            : "Dokument hinzufügen"}
         </button>
 
         {selectedFile ? (
@@ -215,7 +245,8 @@ export default function ProjectDocumentUpload({
               resetMessages();
               resetFileSelection();
             }}
-            className="rounded-lg border border-neutral-700 px-4 py-3 text-sm font-medium text-neutral-300 transition hover:border-neutral-600 hover:bg-neutral-900"
+            disabled={isUploading}
+            className="rounded-lg border border-neutral-700 px-4 py-3 text-sm font-medium text-neutral-300 transition hover:border-neutral-600 hover:bg-neutral-900 disabled:cursor-not-allowed disabled:opacity-60"
           >
             Auswahl entfernen
           </button>

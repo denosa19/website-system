@@ -15,7 +15,9 @@ function formatTimelineDate(date: string) {
   }).format(new Date(date));
 }
 
-function getEventLabel(type: TimelineEventType) {
+function getEventLabel(
+  type: TimelineEventType
+) {
   switch (type) {
     case "project_created":
       return "Projekt";
@@ -29,6 +31,9 @@ function getEventLabel(type: TimelineEventType) {
     case "note_updated":
     case "note_deleted":
       return "Notiz";
+
+    case "document_added":
+      return "Dokument";
 
     case "project_updated":
       return "Aktualisierung";
@@ -55,11 +60,18 @@ export default function ProjectTimeline({
   events,
 }: ProjectTimelineProps) {
   const projectEvents = events
-    .filter((event) => event.projectId === projectId)
+    .filter(
+      (event) =>
+        event.projectId === projectId
+    )
     .sort(
       (firstEvent, secondEvent) =>
-        new Date(secondEvent.createdAt).getTime() -
-        new Date(firstEvent.createdAt).getTime()
+        new Date(
+          secondEvent.createdAt
+        ).getTime() -
+        new Date(
+          firstEvent.createdAt
+        ).getTime()
     );
 
   return (
@@ -93,66 +105,74 @@ export default function ProjectTimeline({
           </div>
         ) : (
           <ol className="space-y-0">
-            {projectEvents.map((event, index) => {
-              const isLastEvent =
-                index === projectEvents.length - 1;
+            {projectEvents.map(
+              (event, index) => {
+                const isLastEvent =
+                  index ===
+                  projectEvents.length - 1;
 
-              return (
-                <li
-                  key={event.id}
-                  className="relative grid grid-cols-[28px_1fr] gap-4"
-                >
-                  <div className="relative flex justify-center">
-                    <span className="relative z-10 mt-1.5 h-3 w-3 rounded-full border-2 border-neutral-400 bg-neutral-900" />
-
-                    {!isLastEvent && (
-                      <span className="absolute bottom-0 top-4 w-px bg-neutral-800" />
-                    )}
-                  </div>
-
-                  <article
-                    className={
-                      isLastEvent
-                        ? "pb-0"
-                        : "pb-8"
-                    }
+                return (
+                  <li
+                    key={event.id}
+                    className="relative grid grid-cols-[28px_1fr] gap-4"
                   >
-                    <div className="rounded-xl border border-neutral-800 bg-neutral-950 p-5">
-                      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                        <div>
-                          <span className="inline-flex rounded-full border border-neutral-700 px-3 py-1 text-xs font-medium text-neutral-400">
-                            {getEventLabel(event.type)}
-                          </span>
+                    <div className="relative flex justify-center">
+                      <span className="relative z-10 mt-1.5 h-3 w-3 rounded-full border-2 border-neutral-400 bg-neutral-900" />
 
-                          <h3 className="mt-3 font-semibold text-white">
-                            {event.title}
-                          </h3>
+                      {!isLastEvent ? (
+                        <span className="absolute bottom-0 top-4 w-px bg-neutral-800" />
+                      ) : null}
+                    </div>
+
+                    <article
+                      className={
+                        isLastEvent
+                          ? "pb-0"
+                          : "pb-8"
+                      }
+                    >
+                      <div className="rounded-xl border border-neutral-800 bg-neutral-950 p-5">
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                          <div>
+                            <span className="inline-flex rounded-full border border-neutral-700 px-3 py-1 text-xs font-medium text-neutral-400">
+                              {getEventLabel(
+                                event.type
+                              )}
+                            </span>
+
+                            <h3 className="mt-3 font-semibold text-white">
+                              {event.title}
+                            </h3>
+                          </div>
+
+                          <time
+                            dateTime={
+                              event.createdAt
+                            }
+                            className="shrink-0 text-xs text-neutral-500"
+                          >
+                            {formatTimelineDate(
+                              event.createdAt
+                            )}
+                          </time>
                         </div>
 
-                        <time
-                          dateTime={event.createdAt}
-                          className="shrink-0 text-xs text-neutral-500"
-                        >
-                          {formatTimelineDate(
-                            event.createdAt
-                          )}
-                        </time>
-                      </div>
+                        {event.description ? (
+                          <p className="mt-3 leading-7 text-neutral-400">
+                            {event.description}
+                          </p>
+                        ) : null}
 
-                      {event.description && (
-                        <p className="mt-3 leading-7 text-neutral-400">
-                          {event.description}
+                        <p className="mt-4 text-xs text-neutral-600">
+                          Ausgeführt von{" "}
+                          {event.author}
                         </p>
-                      )}
-
-                      <p className="mt-4 text-xs text-neutral-600">
-                        Ausgeführt von {event.author}
-                      </p>
-                    </div>
-                  </article>
-                </li>
-              );
-            })}
+                      </div>
+                    </article>
+                  </li>
+                );
+              }
+            )}
           </ol>
         )}
       </div>
