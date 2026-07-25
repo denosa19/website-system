@@ -33,6 +33,8 @@ function getEventLabel(
       return "Notiz";
 
     case "document_added":
+    case "document_updated":
+    case "document_deleted":
       return "Dokument";
 
     case "project_updated":

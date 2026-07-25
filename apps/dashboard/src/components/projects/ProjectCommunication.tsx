@@ -13,6 +13,7 @@ import {
   createCommentUpdatedActivity,
   createDocumentAddedActivity,
   createDocumentDeletedActivity,
+  createDocumentUpdatedActivity,
   createNoteAddedActivity,
   createNoteDeletedActivity,
   createNoteUpdatedActivity,
@@ -297,6 +298,29 @@ export default function ProjectCommunication({
     );
   }
 
+  function handleDocumentUpdated(
+    document: ProjectDocument
+  ) {
+    setProjectDocuments(
+      (currentDocuments) =>
+        currentDocuments.map(
+          (currentDocument) =>
+            currentDocument.id === document.id
+              ? document
+              : currentDocument
+        )
+    );
+
+    addTimelineEvent(
+      createDocumentUpdatedActivity(
+        projectId,
+        document.name,
+        document.currentVersionNumber ?? 1,
+        document.uploadedBy
+      )
+    );
+  }
+
   function handleDocumentDeleted(
     document: ProjectDocument
   ) {
@@ -348,6 +372,9 @@ export default function ProjectCommunication({
         documents={projectDocuments}
         onDocumentCreated={
           handleDocumentCreated
+        }
+        onDocumentUpdated={
+          handleDocumentUpdated
         }
         onDocumentDeleted={
           handleDocumentDeleted

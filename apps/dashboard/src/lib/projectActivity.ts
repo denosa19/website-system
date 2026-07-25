@@ -125,6 +125,21 @@ export function createDocumentAddedActivity(
   });
 }
 
+export function createDocumentUpdatedActivity(
+  projectId: string,
+  fileName: string,
+  versionNumber: number,
+  author = "Dennis"
+): TimelineEvent {
+  return createProjectActivity({
+    projectId,
+    type: "document_updated",
+    title: "Dokument aktualisiert",
+    description: `${author} hat für „${fileName}“ Version ${versionNumber} hochgeladen.`,
+    author,
+  });
+}
+
 export function createDocumentDeletedActivity(
   projectId: string,
   fileName: string,

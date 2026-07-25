@@ -7,6 +7,7 @@ export type TimelineEventType =
   | "note_updated"
   | "note_deleted"
   | "document_added"
+  | "document_updated"
   | "document_deleted"
   | "project_updated"
   | "status_changed"

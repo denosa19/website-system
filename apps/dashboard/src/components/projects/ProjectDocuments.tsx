@@ -8,11 +8,15 @@ import {
 } from "@/lib/projectDocuments";
 import type { ProjectDocument } from "@/types/document";
 import ProjectDocumentUpload from "./ProjectDocumentUpload";
+import ProjectDocumentVersions from "./ProjectDocumentVersions";
 
 type ProjectDocumentsProps = {
   projectId: string;
   documents: ProjectDocument[];
   onDocumentCreated: (
+    document: ProjectDocument
+  ) => void;
+  onDocumentUpdated: (
     document: ProjectDocument
   ) => void;
   onDocumentDeleted: (
@@ -31,6 +35,7 @@ export default function ProjectDocuments({
   projectId,
   documents,
   onDocumentCreated,
+  onDocumentUpdated,
   onDocumentDeleted,
 }: ProjectDocumentsProps) {
   const [errorMessage, setErrorMessage] =
@@ -66,7 +71,7 @@ export default function ProjectDocuments({
 
     if (!document.storageKey) {
       setErrorMessage(
-        `Für „${document.name}“ ist keine gespeicherte Datei vorhanden. Der Eintrag wurde vor der echten Dateispeicherung erstellt.`
+        `Für „${document.name}“ ist keine gespeicherte Datei vorhanden.`
       );
 
       return null;
@@ -128,13 +133,6 @@ export default function ProjectDocuments({
       window.setTimeout(() => {
         window.URL.revokeObjectURL(fileUrl);
       }, 60_000);
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Das Dokument konnte nicht geöffnet werden.";
-
-      setErrorMessage(message);
     } finally {
       setActiveDocumentId(null);
     }
@@ -171,13 +169,6 @@ export default function ProjectDocuments({
       downloadLink.remove();
 
       window.URL.revokeObjectURL(fileUrl);
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Das Dokument konnte nicht heruntergeladen werden.";
-
-      setErrorMessage(message);
     } finally {
       setActiveDocumentId(null);
     }
@@ -194,11 +185,24 @@ export default function ProjectDocuments({
     setErrorMessage("");
 
     try {
+      const storageKeys = new Set<string>();
+
       if (document.storageKey) {
-        await documentStorage.deleteFile(
-          document.storageKey
-        );
+        storageKeys.add(document.storageKey);
       }
+
+      document.versions?.forEach((version) => {
+        storageKeys.add(version.storageKey);
+      });
+
+      await Promise.all(
+        Array.from(storageKeys).map(
+          (storageKey) =>
+            documentStorage.deleteFile(
+              storageKey
+            )
+        )
+      );
 
       onDocumentDeleted(document);
       setDocumentPendingDeletion(null);
@@ -273,9 +277,17 @@ export default function ProjectDocuments({
                   >
                     <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
                       <div className="min-w-0">
-                        <h3 className="break-words font-semibold text-white">
-                          {document.name}
-                        </h3>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="break-words font-semibold text-white">
+                            {document.name}
+                          </h3>
+
+                          <span className="rounded-full border border-neutral-700 px-2.5 py-1 text-xs text-neutral-400">
+                            Version{" "}
+                            {document.currentVersionNumber ??
+                              1}
+                          </span>
+                        </div>
 
                         <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-neutral-500">
                           <span>
@@ -373,6 +385,13 @@ export default function ProjectDocuments({
                         </button>
                       </div>
                     </div>
+
+                    <ProjectDocumentVersions
+                      document={document}
+                      onDocumentUpdated={
+                        onDocumentUpdated
+                      }
+                    />
                   </article>
                 );
               })}
@@ -405,8 +424,8 @@ export default function ProjectDocuments({
               <span className="font-medium text-neutral-200">
                 „{documentPendingDeletion.name}“
               </span>{" "}
-              wird dauerhaft aus diesem Browser und
-              aus dem Projekt entfernt.
+              wird einschließlich aller Versionen
+              dauerhaft entfernt.
             </p>
 
             <p className="mt-3 text-sm text-neutral-500">

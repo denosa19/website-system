@@ -7,6 +7,17 @@ export type ProjectDocumentCategory =
   | "text"
   | "other";
 
+export interface ProjectDocumentVersion {
+  id: string;
+  versionNumber: number;
+  originalName: string;
+  mimeType: string;
+  size: number;
+  uploadedBy: string;
+  uploadedAt: string;
+  storageKey: string;
+}
+
 export interface ProjectDocument {
   id: string;
   projectId: string;
@@ -18,4 +29,6 @@ export interface ProjectDocument {
   uploadedBy: string;
   uploadedAt: string;
   storageKey?: string;
+  currentVersionNumber?: number;
+  versions?: ProjectDocumentVersion[];
 }
