@@ -12,6 +12,7 @@ import {
   createCommentDeletedActivity,
   createCommentUpdatedActivity,
   createDocumentAddedActivity,
+  createDocumentDeletedActivity,
   createNoteAddedActivity,
   createNoteDeletedActivity,
   createNoteUpdatedActivity,
@@ -296,6 +297,26 @@ export default function ProjectCommunication({
     );
   }
 
+  function handleDocumentDeleted(
+    document: ProjectDocument
+  ) {
+    setProjectDocuments(
+      (currentDocuments) =>
+        currentDocuments.filter(
+          (currentDocument) =>
+            currentDocument.id !== document.id
+        )
+    );
+
+    addTimelineEvent(
+      createDocumentDeletedActivity(
+        projectId,
+        document.name,
+        "Dennis"
+      )
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="grid gap-6 xl:grid-cols-2">
@@ -327,6 +348,9 @@ export default function ProjectCommunication({
         documents={projectDocuments}
         onDocumentCreated={
           handleDocumentCreated
+        }
+        onDocumentDeleted={
+          handleDocumentDeleted
         }
       />
 

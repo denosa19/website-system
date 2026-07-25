@@ -124,3 +124,17 @@ export function createDocumentAddedActivity(
     author,
   });
 }
+
+export function createDocumentDeletedActivity(
+  projectId: string,
+  fileName: string,
+  author = "Dennis"
+): TimelineEvent {
+  return createProjectActivity({
+    projectId,
+    type: "document_deleted",
+    title: "Dokument gelöscht",
+    description: `${author} hat das Dokument „${fileName}“ gelöscht.`,
+    author,
+  });
+}
