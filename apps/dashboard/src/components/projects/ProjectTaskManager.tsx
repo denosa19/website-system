@@ -8,6 +8,13 @@ import {
 } from "react";
 import { tasks as initialTasks } from "@/data/tasks";
 import {
+  createTaskAddedActivity,
+  createTaskCompletedActivity,
+  createTaskDeletedActivity,
+  createTaskReopenedActivity,
+  createTaskUpdatedActivity,
+} from "@/lib/projectActivity";
+import {
   calculateTaskProgress,
   createProjectTask,
   deleteProjectTask,
@@ -23,9 +30,13 @@ import type {
   ProjectTaskPriority,
   ProjectTaskStatus,
 } from "@/types/task";
+import type { TimelineEvent } from "@/types/timeline";
 
 type ProjectTaskManagerProps = {
   projectId: string;
+  onTaskActivity?: (
+    activity: TimelineEvent
+  ) => void;
 };
 
 type TaskFormState = {
@@ -106,6 +117,7 @@ function loadStoredTasks(): ProjectTask[] {
 
 export default function ProjectTaskManager({
   projectId,
+  onTaskActivity,
 }: ProjectTaskManagerProps) {
   const [tasks, setTasks] =
     useState<ProjectTask[]>(initialTasks);
@@ -194,6 +206,50 @@ export default function ProjectTaskManager({
     setIsFormOpen(true);
   }
 
+  function emitTaskUpdateActivity(
+    previousTask: ProjectTask,
+    updatedTask: ProjectTask
+  ) {
+    if (!onTaskActivity) {
+      return;
+    }
+
+    if (
+      previousTask.status !== "completed" &&
+      updatedTask.status === "completed"
+    ) {
+      onTaskActivity(
+        createTaskCompletedActivity(
+          projectId,
+          updatedTask.title
+        )
+      );
+
+      return;
+    }
+
+    if (
+      previousTask.status === "completed" &&
+      updatedTask.status !== "completed"
+    ) {
+      onTaskActivity(
+        createTaskReopenedActivity(
+          projectId,
+          updatedTask.title
+        )
+      );
+
+      return;
+    }
+
+    onTaskActivity(
+      createTaskUpdatedActivity(
+        projectId,
+        updatedTask.title
+      )
+    );
+  }
+
   function handleSubmit(
     event: FormEvent<HTMLFormElement>
   ) {
@@ -243,6 +299,11 @@ export default function ProjectTaskManager({
             updatedTask
           )
         );
+
+        emitTaskUpdateActivity(
+          taskToUpdate,
+          updatedTask
+        );
       } else {
         const newTask = createProjectTask({
           projectId,
@@ -258,6 +319,13 @@ export default function ProjectTaskManager({
           ...currentTasks,
           newTask,
         ]);
+
+        onTaskActivity?.(
+          createTaskAddedActivity(
+            projectId,
+            newTask.title
+          )
+        );
       }
 
       resetForm();
@@ -282,6 +350,24 @@ export default function ProjectTaskManager({
         updatedTask
       )
     );
+
+    if (updatedTask.status === "completed") {
+      onTaskActivity?.(
+        createTaskCompletedActivity(
+          projectId,
+          updatedTask.title
+        )
+      );
+
+      return;
+    }
+
+    onTaskActivity?.(
+      createTaskReopenedActivity(
+        projectId,
+        updatedTask.title
+      )
+    );
   }
 
   function handleDelete(task: ProjectTask) {
@@ -297,6 +383,13 @@ export default function ProjectTaskManager({
       deleteProjectTask(
         currentTasks,
         task.id
+      )
+    );
+
+    onTaskActivity?.(
+      createTaskDeletedActivity(
+        projectId,
+        task.title
       )
     );
 
@@ -424,12 +517,15 @@ export default function ProjectTaskManager({
                   <option value="open">
                     Offen
                   </option>
+
                   <option value="in_progress">
                     In Arbeit
                   </option>
+
                   <option value="waiting">
                     Wartet
                   </option>
+
                   <option value="completed">
                     Erledigt
                   </option>
@@ -452,12 +548,15 @@ export default function ProjectTaskManager({
                   <option value="low">
                     Niedrig
                   </option>
+
                   <option value="medium">
                     Mittel
                   </option>
+
                   <option value="high">
                     Hoch
                   </option>
+
                   <option value="critical">
                     Kritisch
                   </option>
