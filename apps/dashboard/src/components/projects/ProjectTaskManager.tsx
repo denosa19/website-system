@@ -19,6 +19,7 @@ import {
   createProjectTask,
   deleteProjectTask,
   getProjectTasks,
+  isTaskOverdue,
   replaceProjectTask,
   sortProjectTasks,
   toggleProjectTaskCompleted,
@@ -48,6 +49,21 @@ type TaskFormState = {
   dueDate: string;
 };
 
+type StatusFilter =
+  | "all"
+  | ProjectTaskStatus;
+
+type PriorityFilter =
+  | "all"
+  | ProjectTaskPriority;
+
+type TaskSort =
+  | "due_date"
+  | "priority"
+  | "title"
+  | "newest"
+  | "oldest";
+
 const EMPTY_FORM: TaskFormState = {
   title: "",
   description: "",
@@ -58,6 +74,16 @@ const EMPTY_FORM: TaskFormState = {
 };
 
 const STORAGE_KEY = "dashboard-project-tasks";
+
+const PRIORITY_ORDER: Record<
+  ProjectTaskPriority,
+  number
+> = {
+  critical: 4,
+  high: 3,
+  medium: 2,
+  low: 1,
+};
 
 function loadStoredTasks(): ProjectTask[] {
   if (typeof window === "undefined") {
@@ -85,6 +111,77 @@ function loadStoredTasks(): ProjectTask[] {
   }
 }
 
+function sortFilteredTasks(
+  tasks: ProjectTask[],
+  sort: TaskSort
+) {
+  return [...tasks].sort((firstTask, secondTask) => {
+    if (sort === "priority") {
+      const priorityDifference =
+        PRIORITY_ORDER[secondTask.priority] -
+        PRIORITY_ORDER[firstTask.priority];
+
+      if (priorityDifference !== 0) {
+        return priorityDifference;
+      }
+
+      return firstTask.title.localeCompare(
+        secondTask.title,
+        "de"
+      );
+    }
+
+    if (sort === "title") {
+      return firstTask.title.localeCompare(
+        secondTask.title,
+        "de"
+      );
+    }
+
+    if (sort === "newest") {
+      return (
+        new Date(secondTask.createdAt).getTime() -
+        new Date(firstTask.createdAt).getTime()
+      );
+    }
+
+    if (sort === "oldest") {
+      return (
+        new Date(firstTask.createdAt).getTime() -
+        new Date(secondTask.createdAt).getTime()
+      );
+    }
+
+    if (!firstTask.dueDate && !secondTask.dueDate) {
+      return firstTask.title.localeCompare(
+        secondTask.title,
+        "de"
+      );
+    }
+
+    if (!firstTask.dueDate) {
+      return 1;
+    }
+
+    if (!secondTask.dueDate) {
+      return -1;
+    }
+
+    const dueDateDifference =
+      new Date(firstTask.dueDate).getTime() -
+      new Date(secondTask.dueDate).getTime();
+
+    if (dueDateDifference !== 0) {
+      return dueDateDifference;
+    }
+
+    return firstTask.title.localeCompare(
+      secondTask.title,
+      "de"
+    );
+  });
+}
+
 export default function ProjectTaskManager({
   projectId,
   onTaskActivity,
@@ -106,6 +203,24 @@ export default function ProjectTaskManager({
 
   const [isLoaded, setIsLoaded] =
     useState(false);
+
+  const [searchQuery, setSearchQuery] =
+    useState("");
+
+  const [statusFilter, setStatusFilter] =
+    useState<StatusFilter>("all");
+
+  const [priorityFilter, setPriorityFilter] =
+    useState<PriorityFilter>("all");
+
+  const [assigneeFilter, setAssigneeFilter] =
+    useState("all");
+
+  const [onlyOverdue, setOnlyOverdue] =
+    useState(false);
+
+  const [taskSort, setTaskSort] =
+    useState<TaskSort>("due_date");
 
   useEffect(() => {
     setTasks(loadStoredTasks());
@@ -129,6 +244,78 @@ export default function ProjectTaskManager({
     );
   }, [projectId, tasks]);
 
+  const assignees = useMemo(() => {
+    return Array.from(
+      new Set(
+        projectTasks
+          .map((task) => task.assignee.trim())
+          .filter(Boolean)
+      )
+    ).sort((firstAssignee, secondAssignee) =>
+      firstAssignee.localeCompare(
+        secondAssignee,
+        "de"
+      )
+    );
+  }, [projectTasks]);
+
+  const filteredTasks = useMemo(() => {
+    const normalizedSearch =
+      searchQuery.trim().toLowerCase();
+
+    const matchingTasks = projectTasks.filter(
+      (task) => {
+        const matchesSearch =
+          !normalizedSearch ||
+          task.title
+            .toLowerCase()
+            .includes(normalizedSearch) ||
+          task.description
+            .toLowerCase()
+            .includes(normalizedSearch) ||
+          task.assignee
+            .toLowerCase()
+            .includes(normalizedSearch);
+
+        const matchesStatus =
+          statusFilter === "all" ||
+          task.status === statusFilter;
+
+        const matchesPriority =
+          priorityFilter === "all" ||
+          task.priority === priorityFilter;
+
+        const matchesAssignee =
+          assigneeFilter === "all" ||
+          task.assignee === assigneeFilter;
+
+        const matchesOverdue =
+          !onlyOverdue || isTaskOverdue(task);
+
+        return (
+          matchesSearch &&
+          matchesStatus &&
+          matchesPriority &&
+          matchesAssignee &&
+          matchesOverdue
+        );
+      }
+    );
+
+    return sortFilteredTasks(
+      matchingTasks,
+      taskSort
+    );
+  }, [
+    assigneeFilter,
+    onlyOverdue,
+    priorityFilter,
+    projectTasks,
+    searchQuery,
+    statusFilter,
+    taskSort,
+  ]);
+
   const progress = useMemo(() => {
     return calculateTaskProgress(projectTasks);
   }, [projectTasks]);
@@ -136,6 +323,14 @@ export default function ProjectTaskManager({
   const completedCount = projectTasks.filter(
     (task) => task.status === "completed"
   ).length;
+
+  const hasActiveFilters =
+    searchQuery.trim() !== "" ||
+    statusFilter !== "all" ||
+    priorityFilter !== "all" ||
+    assigneeFilter !== "all" ||
+    onlyOverdue ||
+    taskSort !== "due_date";
 
   function updateForm<K extends keyof TaskFormState>(
     key: K,
@@ -152,6 +347,15 @@ export default function ProjectTaskManager({
     setEditingTaskId(null);
     setErrorMessage("");
     setIsFormOpen(false);
+  }
+
+  function resetFilters() {
+    setSearchQuery("");
+    setStatusFilter("all");
+    setPriorityFilter("all");
+    setAssigneeFilter("all");
+    setOnlyOverdue(false);
+    setTaskSort("due_date");
   }
 
   function openCreateForm() {
@@ -631,9 +835,183 @@ export default function ProjectTaskManager({
         </form>
       ) : null}
 
+      <div className="mt-6 rounded-xl border border-neutral-800 bg-neutral-900/70 p-4">
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
+            <label className="grid flex-1 gap-2 text-sm text-neutral-300">
+              Suche
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(event) =>
+                  setSearchQuery(event.target.value)
+                }
+                placeholder="Aufgaben durchsuchen..."
+                className="rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-3 text-white outline-none transition placeholder:text-neutral-600 focus:border-neutral-500"
+              />
+            </label>
+
+            <label className="grid gap-2 text-sm text-neutral-300 lg:w-48">
+              Status
+              <select
+                value={statusFilter}
+                onChange={(event) =>
+                  setStatusFilter(
+                    event.target
+                      .value as StatusFilter
+                  )
+                }
+                className="rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-3 text-white outline-none focus:border-neutral-500"
+              >
+                <option value="all">
+                  Alle Status
+                </option>
+                <option value="open">
+                  Offen
+                </option>
+                <option value="in_progress">
+                  In Arbeit
+                </option>
+                <option value="waiting">
+                  Wartet
+                </option>
+                <option value="completed">
+                  Erledigt
+                </option>
+              </select>
+            </label>
+
+            <label className="grid gap-2 text-sm text-neutral-300 lg:w-48">
+              Priorität
+              <select
+                value={priorityFilter}
+                onChange={(event) =>
+                  setPriorityFilter(
+                    event.target
+                      .value as PriorityFilter
+                  )
+                }
+                className="rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-3 text-white outline-none focus:border-neutral-500"
+              >
+                <option value="all">
+                  Alle Prioritäten
+                </option>
+                <option value="low">
+                  Niedrig
+                </option>
+                <option value="medium">
+                  Mittel
+                </option>
+                <option value="high">
+                  Hoch
+                </option>
+                <option value="critical">
+                  Kritisch
+                </option>
+              </select>
+            </label>
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            <label className="grid gap-2 text-sm text-neutral-300">
+              Verantwortlicher
+              <select
+                value={assigneeFilter}
+                onChange={(event) =>
+                  setAssigneeFilter(
+                    event.target.value
+                  )
+                }
+                className="rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-3 text-white outline-none focus:border-neutral-500"
+              >
+                <option value="all">
+                  Alle Verantwortlichen
+                </option>
+
+                {assignees.map((assignee) => (
+                  <option
+                    key={assignee}
+                    value={assignee}
+                  >
+                    {assignee}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="grid gap-2 text-sm text-neutral-300">
+              Sortierung
+              <select
+                value={taskSort}
+                onChange={(event) =>
+                  setTaskSort(
+                    event.target.value as TaskSort
+                  )
+                }
+                className="rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-3 text-white outline-none focus:border-neutral-500"
+              >
+                <option value="due_date">
+                  Fälligkeitsdatum
+                </option>
+                <option value="priority">
+                  Priorität
+                </option>
+                <option value="title">
+                  Titel A–Z
+                </option>
+                <option value="newest">
+                  Neueste zuerst
+                </option>
+                <option value="oldest">
+                  Älteste zuerst
+                </option>
+              </select>
+            </label>
+
+            <label className="flex min-h-[46px] items-center gap-3 self-end rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm text-neutral-300">
+              <input
+                type="checkbox"
+                checked={onlyOverdue}
+                onChange={(event) =>
+                  setOnlyOverdue(
+                    event.target.checked
+                  )
+                }
+                className="h-4 w-4 rounded border-neutral-600 bg-neutral-900"
+              />
+
+              Nur überfällige Aufgaben
+            </label>
+
+            <button
+              type="button"
+              onClick={resetFilters}
+              disabled={!hasActiveFilters}
+              className="min-h-[46px] self-end rounded-lg border border-neutral-700 px-4 py-3 text-sm font-medium text-neutral-300 transition hover:bg-neutral-800 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Filter zurücksetzen
+            </button>
+          </div>
+
+          <div className="flex flex-col gap-1 border-t border-neutral-800 pt-4 text-sm sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-neutral-400">
+              {filteredTasks.length} von{" "}
+              {projectTasks.length} Aufgaben werden
+              angezeigt
+            </p>
+
+            {hasActiveFilters ? (
+              <p className="text-xs font-medium text-neutral-500">
+                Filter aktiv
+              </p>
+            ) : null}
+          </div>
+        </div>
+      </div>
+
       <div className="mt-6">
         <ProjectTaskBoard
-          tasks={projectTasks}
+          tasks={filteredTasks}
           onEditTask={openEditForm}
           onToggleCompleted={
             handleToggleCompleted
