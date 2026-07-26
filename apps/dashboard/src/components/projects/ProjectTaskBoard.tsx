@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  type DragEvent,
+  useState,
+} from "react";
 import type {
   ProjectTask,
   ProjectTaskPriority,
@@ -11,6 +15,10 @@ type ProjectTaskBoardProps = {
   onEditTask: (task: ProjectTask) => void;
   onToggleCompleted: (task: ProjectTask) => void;
   onDeleteTask: (task: ProjectTask) => void;
+  onStatusChange: (
+    task: ProjectTask,
+    status: ProjectTaskStatus
+  ) => void;
 };
 
 type KanbanColumn = {
@@ -79,11 +87,20 @@ function isTaskOverdue(task: ProjectTask) {
 
 function ProjectTaskBoardCard({
   task,
+  isDragging,
+  onDragStart,
+  onDragEnd,
   onEditTask,
   onToggleCompleted,
   onDeleteTask,
 }: {
   task: ProjectTask;
+  isDragging: boolean;
+  onDragStart: (
+    event: DragEvent<HTMLElement>,
+    task: ProjectTask
+  ) => void;
+  onDragEnd: () => void;
   onEditTask: (task: ProjectTask) => void;
   onToggleCompleted: (task: ProjectTask) => void;
   onDeleteTask: (task: ProjectTask) => void;
@@ -91,7 +108,31 @@ function ProjectTaskBoardCard({
   const overdue = isTaskOverdue(task);
 
   return (
-    <article className="rounded-xl border border-neutral-800 bg-neutral-950 p-4 shadow-sm">
+    <article
+      draggable
+      onDragStart={(event) =>
+        onDragStart(event, task)
+      }
+      onDragEnd={onDragEnd}
+      className={`cursor-grab rounded-xl border bg-neutral-950 p-4 shadow-sm transition active:cursor-grabbing ${
+        isDragging
+          ? "border-neutral-500 opacity-50"
+          : "border-neutral-800 hover:border-neutral-700"
+      }`}
+    >
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <span className="text-xs font-medium text-neutral-600">
+          Ziehen zum Verschieben
+        </span>
+
+        <span
+          aria-hidden="true"
+          className="text-sm tracking-widest text-neutral-600"
+        >
+          ⋮⋮
+        </span>
+      </div>
+
       <div className="flex items-start justify-between gap-3">
         <button
           type="button"
@@ -178,7 +219,81 @@ export default function ProjectTaskBoard({
   onEditTask,
   onToggleCompleted,
   onDeleteTask,
+  onStatusChange,
 }: ProjectTaskBoardProps) {
+  const [draggedTaskId, setDraggedTaskId] =
+    useState<string | null>(null);
+
+  const [activeColumn, setActiveColumn] =
+    useState<ProjectTaskStatus | null>(null);
+
+  function handleDragStart(
+    event: DragEvent<HTMLElement>,
+    task: ProjectTask
+  ) {
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData(
+      "text/plain",
+      task.id
+    );
+
+    setDraggedTaskId(task.id);
+  }
+
+  function handleDragOver(
+    event: DragEvent<HTMLElement>,
+    status: ProjectTaskStatus
+  ) {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+    setActiveColumn(status);
+  }
+
+  function handleDragLeave(
+    event: DragEvent<HTMLElement>
+  ) {
+    const nextTarget =
+      event.relatedTarget as Node | null;
+
+    if (
+      nextTarget &&
+      event.currentTarget.contains(nextTarget)
+    ) {
+      return;
+    }
+
+    setActiveColumn(null);
+  }
+
+  function handleDrop(
+    event: DragEvent<HTMLElement>,
+    status: ProjectTaskStatus
+  ) {
+    event.preventDefault();
+
+    const taskId =
+      event.dataTransfer.getData("text/plain");
+
+    const task = tasks.find(
+      (currentTask) =>
+        currentTask.id === taskId
+    );
+
+    setDraggedTaskId(null);
+    setActiveColumn(null);
+
+    if (!task || task.status === status) {
+      return;
+    }
+
+    onStatusChange(task, status);
+  }
+
+  function handleDragEnd() {
+    setDraggedTaskId(null);
+    setActiveColumn(null);
+  }
+
   return (
     <div className="overflow-x-auto pb-2">
       <div className="grid min-w-[1100px] grid-cols-4 gap-4">
@@ -188,10 +303,30 @@ export default function ProjectTaskBoard({
               task.status === column.status
           );
 
+          const isActive =
+            activeColumn === column.status;
+
           return (
             <section
               key={column.status}
-              className="flex min-h-[320px] flex-col rounded-xl border border-neutral-800 bg-neutral-900/70"
+              onDragOver={(event) =>
+                handleDragOver(
+                  event,
+                  column.status
+                )
+              }
+              onDragLeave={handleDragLeave}
+              onDrop={(event) =>
+                handleDrop(
+                  event,
+                  column.status
+                )
+              }
+              className={`flex min-h-[320px] flex-col rounded-xl border bg-neutral-900/70 transition ${
+                isActive
+                  ? "border-white bg-neutral-800/80"
+                  : "border-neutral-800"
+              }`}
             >
               <header className="border-b border-neutral-800 px-4 py-4">
                 <div className="flex items-center justify-between gap-3">
@@ -211,9 +346,17 @@ export default function ProjectTaskBoard({
 
               <div className="flex flex-1 flex-col gap-3 p-3">
                 {columnTasks.length === 0 ? (
-                  <div className="flex min-h-32 items-center justify-center rounded-lg border border-dashed border-neutral-700 px-4 text-center">
+                  <div
+                    className={`flex min-h-32 items-center justify-center rounded-lg border border-dashed px-4 text-center transition ${
+                      isActive
+                        ? "border-white bg-neutral-800"
+                        : "border-neutral-700"
+                    }`}
+                  >
                     <p className="text-xs leading-5 text-neutral-500">
-                      Keine Aufgaben in dieser Spalte
+                      {isActive
+                        ? "Aufgabe hier ablegen"
+                        : "Keine Aufgaben in dieser Spalte"}
                     </p>
                   </div>
                 ) : (
@@ -221,6 +364,13 @@ export default function ProjectTaskBoard({
                     <ProjectTaskBoardCard
                       key={task.id}
                       task={task}
+                      isDragging={
+                        draggedTaskId === task.id
+                      }
+                      onDragStart={
+                        handleDragStart
+                      }
+                      onDragEnd={handleDragEnd}
                       onEditTask={onEditTask}
                       onToggleCompleted={
                         onToggleCompleted
@@ -229,6 +379,15 @@ export default function ProjectTaskBoard({
                     />
                   ))
                 )}
+
+                {isActive &&
+                columnTasks.length > 0 ? (
+                  <div className="flex min-h-20 items-center justify-center rounded-lg border border-dashed border-white bg-neutral-800 px-4 text-center">
+                    <p className="text-xs font-medium text-neutral-300">
+                      Aufgabe hier ablegen
+                    </p>
+                  </div>
+                ) : null}
               </div>
             </section>
           );

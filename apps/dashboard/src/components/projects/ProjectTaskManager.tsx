@@ -340,6 +340,40 @@ export default function ProjectTaskManager({
     );
   }
 
+  function handleStatusChange(
+    task: ProjectTask,
+    status: ProjectTaskStatus
+  ) {
+    if (task.status === status) {
+      return;
+    }
+
+    const completedAt =
+      status === "completed"
+        ? new Date().toISOString()
+        : null;
+
+    const updatedTask = updateProjectTask(
+      task,
+      {
+        status,
+        completedAt,
+      }
+    );
+
+    setTasks((currentTasks) =>
+      replaceProjectTask(
+        currentTasks,
+        updatedTask
+      )
+    );
+
+    emitTaskUpdateActivity(
+      task,
+      updatedTask
+    );
+  }
+
   function handleDelete(task: ProjectTask) {
     const shouldDelete = window.confirm(
       `Möchtest du die Aufgabe „${task.title}“ wirklich löschen?`
@@ -605,6 +639,7 @@ export default function ProjectTaskManager({
             handleToggleCompleted
           }
           onDeleteTask={handleDelete}
+          onStatusChange={handleStatusChange}
         />
       </div>
     </section>
