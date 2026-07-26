@@ -346,6 +346,7 @@ export default function ProjectCommunication({
     <div className="space-y-6">
       <ProjectTaskManager
         projectId={projectId}
+        onTaskActivity={addTimelineEvent}
       />
 
       <div className="grid gap-6 xl:grid-cols-2">
