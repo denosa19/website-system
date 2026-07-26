@@ -153,3 +153,73 @@ export function createDocumentDeletedActivity(
     author,
   });
 }
+
+export function createTaskAddedActivity(
+  projectId: string,
+  taskTitle: string,
+  author = "Dennis"
+): TimelineEvent {
+  return createProjectActivity({
+    projectId,
+    type: "task_added",
+    title: "Aufgabe erstellt",
+    description: `${author} hat die Aufgabe „${taskTitle}“ erstellt.`,
+    author,
+  });
+}
+
+export function createTaskUpdatedActivity(
+  projectId: string,
+  taskTitle: string,
+  author = "Dennis"
+): TimelineEvent {
+  return createProjectActivity({
+    projectId,
+    type: "task_updated",
+    title: "Aufgabe bearbeitet",
+    description: `${author} hat die Aufgabe „${taskTitle}“ bearbeitet.`,
+    author,
+  });
+}
+
+export function createTaskCompletedActivity(
+  projectId: string,
+  taskTitle: string,
+  author = "Dennis"
+): TimelineEvent {
+  return createProjectActivity({
+    projectId,
+    type: "task_completed",
+    title: "Aufgabe erledigt",
+    description: `${author} hat die Aufgabe „${taskTitle}“ als erledigt markiert.`,
+    author,
+  });
+}
+
+export function createTaskReopenedActivity(
+  projectId: string,
+  taskTitle: string,
+  author = "Dennis"
+): TimelineEvent {
+  return createProjectActivity({
+    projectId,
+    type: "task_reopened",
+    title: "Aufgabe wieder geöffnet",
+    description: `${author} hat die Aufgabe „${taskTitle}“ wieder geöffnet.`,
+    author,
+  });
+}
+
+export function createTaskDeletedActivity(
+  projectId: string,
+  taskTitle: string,
+  author = "Dennis"
+): TimelineEvent {
+  return createProjectActivity({
+    projectId,
+    type: "task_deleted",
+    title: "Aufgabe gelöscht",
+    description: `${author} hat die Aufgabe „${taskTitle}“ gelöscht.`,
+    author,
+  });
+}
