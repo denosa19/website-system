@@ -200,6 +200,19 @@ export default function ProjectTaskManager({
     event.preventDefault();
     setErrorMessage("");
 
+    const formData = new FormData(
+      event.currentTarget
+    );
+
+    const submittedDueDate =
+      formData.get("dueDate");
+
+    const dueDate =
+      typeof submittedDueDate === "string" &&
+      submittedDueDate.trim()
+        ? submittedDueDate.trim()
+        : null;
+
     try {
       if (editingTaskId) {
         const taskToUpdate = tasks.find(
@@ -220,7 +233,7 @@ export default function ProjectTaskManager({
             status: form.status,
             priority: form.priority,
             assignee: form.assignee,
-            dueDate: form.dueDate || null,
+            dueDate,
           }
         );
 
@@ -238,7 +251,7 @@ export default function ProjectTaskManager({
           status: form.status,
           priority: form.priority,
           assignee: form.assignee,
-          dueDate: form.dueDate || null,
+          dueDate,
         });
 
         setTasks((currentTasks) => [
@@ -471,6 +484,7 @@ export default function ProjectTaskManager({
                 Fälligkeitsdatum
                 <input
                   type="date"
+                  name="dueDate"
                   value={form.dueDate}
                   onChange={(event) =>
                     updateForm(
