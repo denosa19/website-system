@@ -1,0 +1,88 @@
+import type { ProjectTask } from "@/types/task";
+
+export const tasks: ProjectTask[] = [
+  {
+    id: "task_001",
+    projectId: "proj_001",
+    title: "Kundendaten prüfen",
+    description:
+      "Alle vorhandenen Kundendaten auf Vollständigkeit und Aktualität prüfen.",
+    status: "completed",
+    priority: "high",
+    assignee: "Dennis",
+    dueDate: "2026-07-12",
+    createdAt: "2026-07-01T09:00:00.000Z",
+    updatedAt: "2026-07-10T14:30:00.000Z",
+    completedAt: "2026-07-10T14:30:00.000Z",
+  },
+  {
+    id: "task_002",
+    projectId: "proj_001",
+    title: "AI-Studio-Prompt erstellen",
+    description:
+      "Den finalen Prompt für die Erstellung und Überarbeitung der Kundenwebsite vorbereiten.",
+    status: "completed",
+    priority: "high",
+    assignee: "Dennis",
+    dueDate: "2026-07-14",
+    createdAt: "2026-07-01T09:10:00.000Z",
+    updatedAt: "2026-07-12T16:00:00.000Z",
+    completedAt: "2026-07-12T16:00:00.000Z",
+  },
+  {
+    id: "task_003",
+    projectId: "proj_001",
+    title: "Website prüfen",
+    description:
+      "Die vollständige Website auf Darstellung, Inhalte, Links und mobile Nutzung prüfen.",
+    status: "in_progress",
+    priority: "critical",
+    assignee: "Dennis",
+    dueDate: "2026-07-27",
+    createdAt: "2026-07-01T09:20:00.000Z",
+    updatedAt: "2026-07-25T18:00:00.000Z",
+    completedAt: null,
+  },
+  {
+    id: "task_004",
+    projectId: "proj_001",
+    title: "SEO-Grundcheck durchführen",
+    description:
+      "Seitentitel, Beschreibungen, Überschriften, Indexierung und grundlegende technische SEO prüfen.",
+    status: "open",
+    priority: "high",
+    assignee: "Dennis",
+    dueDate: "2026-07-28",
+    createdAt: "2026-07-01T09:30:00.000Z",
+    updatedAt: "2026-07-01T09:30:00.000Z",
+    completedAt: null,
+  },
+  {
+    id: "task_005",
+    projectId: "proj_001",
+    title: "Go-live vorbereiten",
+    description:
+      "Deployment, Domain, SSL, Kontaktformular und finale Veröffentlichung vorbereiten.",
+    status: "waiting",
+    priority: "critical",
+    assignee: "Dennis",
+    dueDate: "2026-07-30",
+    createdAt: "2026-07-01T09:40:00.000Z",
+    updatedAt: "2026-07-25T18:15:00.000Z",
+    completedAt: null,
+  },
+  {
+    id: "task_006",
+    projectId: "proj_002",
+    title: "Anforderungen des Kunden strukturieren",
+    description:
+      "Camps, Training, Shop, Buchungssystem und Mitgliederbereich als Anforderungen dokumentieren.",
+    status: "in_progress",
+    priority: "high",
+    assignee: "Dennis",
+    dueDate: "2026-08-02",
+    createdAt: "2026-07-15T10:00:00.000Z",
+    updatedAt: "2026-07-25T19:00:00.000Z",
+    completedAt: null,
+  },
+];
