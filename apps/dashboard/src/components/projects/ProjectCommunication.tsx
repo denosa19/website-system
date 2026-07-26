@@ -25,6 +25,7 @@ import type { TimelineEvent } from "@/types/timeline";
 import ProjectComments from "./ProjectComments";
 import ProjectDocuments from "./ProjectDocuments";
 import ProjectNotes from "./ProjectNotes";
+import ProjectTaskManager from "./ProjectTaskManager";
 import ProjectTimeline from "./ProjectTimeline";
 
 type ProjectCommunicationProps = {
@@ -343,6 +344,10 @@ export default function ProjectCommunication({
 
   return (
     <div className="space-y-6">
+      <ProjectTaskManager
+        projectId={projectId}
+      />
+
       <div className="grid gap-6 xl:grid-cols-2">
         <ProjectComments
           projectId={projectId}
