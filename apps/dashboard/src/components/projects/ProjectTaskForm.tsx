@@ -51,6 +51,12 @@ export default function ProjectTaskForm({
       onSubmit={onSubmit}
       className="mt-6 rounded-xl border border-neutral-800 bg-neutral-900 p-5"
     >
+      <input
+        type="hidden"
+        name="dueDate"
+        value={form.dueDate}
+      />
+
       <div className="flex items-center justify-between gap-4">
         <h3 className="font-semibold text-white">
           {editingTaskId
@@ -189,7 +195,6 @@ export default function ProjectTaskForm({
 
             <input
               type="date"
-              name="dueDate"
               value={form.dueDate}
               onChange={(event) =>
                 onChange(
