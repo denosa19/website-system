@@ -19,7 +19,6 @@ import {
   createProjectTask,
   deleteProjectTask,
   getProjectTasks,
-  isTaskOverdue,
   replaceProjectTask,
   sortProjectTasks,
   toggleProjectTaskCompleted,
@@ -31,6 +30,7 @@ import type {
   ProjectTaskStatus,
 } from "@/types/task";
 import type { TimelineEvent } from "@/types/timeline";
+import ProjectTaskBoard from "./ProjectTaskBoard";
 
 type ProjectTaskManagerProps = {
   projectId: string;
@@ -57,37 +57,7 @@ const EMPTY_FORM: TaskFormState = {
   dueDate: "",
 };
 
-const STATUS_LABELS: Record<
-  ProjectTaskStatus,
-  string
-> = {
-  open: "Offen",
-  in_progress: "In Arbeit",
-  waiting: "Wartet",
-  completed: "Erledigt",
-};
-
-const PRIORITY_LABELS: Record<
-  ProjectTaskPriority,
-  string
-> = {
-  low: "Niedrig",
-  medium: "Mittel",
-  high: "Hoch",
-  critical: "Kritisch",
-};
-
 const STORAGE_KEY = "dashboard-project-tasks";
-
-function formatDate(value: string | null) {
-  if (!value) {
-    return "Keine Frist";
-  }
-
-  return new Intl.DateTimeFormat("de-DE", {
-    dateStyle: "medium",
-  }).format(new Date(`${value}T12:00:00`));
-}
 
 function loadStoredTasks(): ProjectTask[] {
   if (typeof window === "undefined") {
@@ -627,131 +597,15 @@ export default function ProjectTaskManager({
         </form>
       ) : null}
 
-      <div className="mt-6 space-y-3">
-        {projectTasks.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-neutral-700 px-5 py-8 text-center">
-            <p className="font-medium text-white">
-              Noch keine Aufgaben vorhanden
-            </p>
-
-            <p className="mt-2 text-sm text-neutral-500">
-              Erstelle die erste Aufgabe für dieses
-              Projekt.
-            </p>
-          </div>
-        ) : (
-          projectTasks.map((task) => {
-            const overdue = isTaskOverdue(task);
-
-            return (
-              <article
-                key={task.id}
-                className="rounded-xl border border-neutral-800 bg-neutral-900 p-4"
-              >
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                  <div className="flex min-w-0 gap-3">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        handleToggleCompleted(task)
-                      }
-                      aria-label={
-                        task.status === "completed"
-                          ? "Aufgabe wieder öffnen"
-                          : "Aufgabe erledigen"
-                      }
-                      className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs transition ${
-                        task.status === "completed"
-                          ? "border-emerald-600 bg-emerald-600 text-white"
-                          : "border-neutral-600 text-transparent hover:border-neutral-400"
-                      }`}
-                    >
-                      ✓
-                    </button>
-
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3
-                          className={`font-semibold ${
-                            task.status ===
-                            "completed"
-                              ? "text-neutral-500 line-through"
-                              : "text-white"
-                          }`}
-                        >
-                          {task.title}
-                        </h3>
-
-                        <span className="rounded-full border border-neutral-700 px-2.5 py-1 text-xs text-neutral-300">
-                          {
-                            STATUS_LABELS[
-                              task.status
-                            ]
-                          }
-                        </span>
-
-                        <span className="rounded-full border border-neutral-700 px-2.5 py-1 text-xs text-neutral-300">
-                          {
-                            PRIORITY_LABELS[
-                              task.priority
-                            ]
-                          }
-                        </span>
-
-                        {overdue ? (
-                          <span className="rounded-full border border-red-900 bg-red-950/40 px-2.5 py-1 text-xs font-medium text-red-300">
-                            Überfällig
-                          </span>
-                        ) : null}
-                      </div>
-
-                      {task.description ? (
-                        <p className="mt-3 text-sm leading-6 text-neutral-400">
-                          {task.description}
-                        </p>
-                      ) : null}
-
-                      <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-xs text-neutral-500">
-                        <span>
-                          Verantwortlich:{" "}
-                          {task.assignee ||
-                            "Nicht zugewiesen"}
-                        </span>
-
-                        <span>
-                          Fällig:{" "}
-                          {formatDate(task.dueDate)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex shrink-0 gap-2">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        openEditForm(task)
-                      }
-                      className="rounded-lg border border-neutral-700 px-3 py-2 text-sm text-neutral-300 transition hover:bg-neutral-800 hover:text-white"
-                    >
-                      Bearbeiten
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        handleDelete(task)
-                      }
-                      className="rounded-lg border border-red-900/70 px-3 py-2 text-sm text-red-300 transition hover:bg-red-950/40"
-                    >
-                      Löschen
-                    </button>
-                  </div>
-                </div>
-              </article>
-            );
-          })
-        )}
+      <div className="mt-6">
+        <ProjectTaskBoard
+          tasks={projectTasks}
+          onEditTask={openEditForm}
+          onToggleCompleted={
+            handleToggleCompleted
+          }
+          onDeleteTask={handleDelete}
+        />
       </div>
     </section>
   );
