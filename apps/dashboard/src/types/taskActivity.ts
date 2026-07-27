@@ -1,6 +1,8 @@
 export type TaskActivityType =
   | "created"
   | "updated"
+  | "title_changed"
+  | "description_changed"
   | "comment_added"
   | "comment_updated"
   | "comment_deleted"
@@ -8,6 +10,8 @@ export type TaskActivityType =
   | "attachment_deleted"
   | "status_changed"
   | "priority_changed"
+  | "assignee_changed"
+  | "due_date_changed"
   | "completed";
 
 export interface TaskActivity {

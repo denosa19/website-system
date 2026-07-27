@@ -12,6 +12,8 @@ const ACTIVITY_LABELS: Record<
 > = {
   created: "Aufgabe erstellt",
   updated: "Aufgabe aktualisiert",
+  title_changed: "Titel geändert",
+  description_changed: "Beschreibung geändert",
   comment_added: "Kommentar hinzugefügt",
   comment_updated: "Kommentar bearbeitet",
   comment_deleted: "Kommentar gelöscht",
@@ -19,6 +21,8 @@ const ACTIVITY_LABELS: Record<
   attachment_deleted: "Datei gelöscht",
   status_changed: "Status geändert",
   priority_changed: "Priorität geändert",
+  assignee_changed: "Verantwortlicher geändert",
+  due_date_changed: "Fälligkeitsdatum geändert",
   completed: "Aufgabe abgeschlossen",
 };
 
