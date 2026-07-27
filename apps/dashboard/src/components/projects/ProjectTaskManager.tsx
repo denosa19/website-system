@@ -25,11 +25,18 @@ import {
   toggleProjectTaskCompleted,
   updateProjectTask,
 } from "@/lib/projectTasks";
+import {
+  createTaskActivity,
+} from "@/lib/taskActivity";
 import type {
   ProjectTask,
   ProjectTaskPriority,
   ProjectTaskStatus,
 } from "@/types/task";
+import type {
+  TaskActivity,
+  TaskActivityType,
+} from "@/types/taskActivity";
 import type { TimelineEvent } from "@/types/timeline";
 import ProjectTaskBoard from "./ProjectTaskBoard";
 import ProjectTaskCalendar from "./ProjectTaskCalendar";
@@ -53,7 +60,31 @@ type ProjectTaskManagerProps = {
 
 type TaskView = "board" | "calendar";
 
-const STORAGE_KEY = "dashboard-project-tasks";
+const STORAGE_KEY =
+  "dashboard-project-tasks";
+
+const TASK_ACTIVITIES_STORAGE_KEY =
+  "website-system-task-activities";
+
+const STATUS_LABELS: Record<
+  ProjectTaskStatus,
+  string
+> = {
+  open: "Offen",
+  in_progress: "In Arbeit",
+  waiting: "Wartet",
+  completed: "Erledigt",
+};
+
+const PRIORITY_LABELS: Record<
+  ProjectTaskPriority,
+  string
+> = {
+  low: "Niedrig",
+  medium: "Mittel",
+  high: "Hoch",
+  critical: "Kritisch",
+};
 
 const PRIORITY_ORDER: Record<
   ProjectTaskPriority,
@@ -71,7 +102,9 @@ function loadStoredTasks(): ProjectTask[] {
   }
 
   const storedTasks =
-    window.localStorage.getItem(STORAGE_KEY);
+    window.localStorage.getItem(
+      STORAGE_KEY
+    );
 
   if (!storedTasks) {
     return initialTasks;
@@ -87,6 +120,200 @@ function loadStoredTasks(): ProjectTask[] {
       : initialTasks;
   } catch {
     return initialTasks;
+  }
+}
+
+function loadStoredTaskActivities():
+  TaskActivity[] {
+  if (typeof window === "undefined") {
+    return [];
+  }
+
+  try {
+    const storedActivities =
+      window.localStorage.getItem(
+        TASK_ACTIVITIES_STORAGE_KEY
+      );
+
+    if (!storedActivities) {
+      return [];
+    }
+
+    const parsedActivities: unknown =
+      JSON.parse(storedActivities);
+
+    return Array.isArray(
+      parsedActivities
+    )
+      ? (parsedActivities as TaskActivity[])
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveTaskActivity(
+  taskId: string,
+  type: TaskActivityType,
+  message: string
+) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  const activity =
+    createTaskActivity({
+      taskId,
+      type,
+      author: "Dennis",
+      message,
+    });
+
+  const currentActivities =
+    loadStoredTaskActivities();
+
+  try {
+    window.localStorage.setItem(
+      TASK_ACTIVITIES_STORAGE_KEY,
+      JSON.stringify([
+        ...currentActivities,
+        activity,
+      ])
+    );
+  } catch (error) {
+    console.error(
+      "Die Aufgabenaktivität konnte nicht gespeichert werden.",
+      error
+    );
+  }
+}
+
+function formatActivityDate(
+  value: string | null
+): string {
+  if (!value) {
+    return "Nicht festgelegt";
+  }
+
+  return new Intl.DateTimeFormat(
+    "de-DE",
+    {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    }
+  ).format(
+    new Date(`${value}T12:00:00`)
+  );
+}
+
+function logTaskChanges(
+  previousTask: ProjectTask,
+  updatedTask: ProjectTask
+) {
+  if (
+    previousTask.title !==
+    updatedTask.title
+  ) {
+    saveTaskActivity(
+      updatedTask.id,
+      "updated",
+      `Titel geändert: ${previousTask.title} → ${updatedTask.title}`
+    );
+  }
+
+  if (
+    previousTask.description !==
+    updatedTask.description
+  ) {
+    saveTaskActivity(
+      updatedTask.id,
+      "updated",
+      "Beschreibung geändert"
+    );
+  }
+
+  if (
+    previousTask.status !==
+    updatedTask.status
+  ) {
+    if (
+      updatedTask.status ===
+      "completed"
+    ) {
+      saveTaskActivity(
+        updatedTask.id,
+        "completed",
+        "Aufgabe abgeschlossen"
+      );
+    } else {
+      saveTaskActivity(
+        updatedTask.id,
+        "status_changed",
+        `Status geändert: ${
+          STATUS_LABELS[
+            previousTask.status
+          ]
+        } → ${
+          STATUS_LABELS[
+            updatedTask.status
+          ]
+        }`
+      );
+    }
+  }
+
+  if (
+    previousTask.priority !==
+    updatedTask.priority
+  ) {
+    saveTaskActivity(
+      updatedTask.id,
+      "priority_changed",
+      `Priorität geändert: ${
+        PRIORITY_LABELS[
+          previousTask.priority
+        ]
+      } → ${
+        PRIORITY_LABELS[
+          updatedTask.priority
+        ]
+      }`
+    );
+  }
+
+  if (
+    previousTask.assignee !==
+    updatedTask.assignee
+  ) {
+    const previousAssignee =
+      previousTask.assignee ||
+      "Nicht zugewiesen";
+
+    const updatedAssignee =
+      updatedTask.assignee ||
+      "Nicht zugewiesen";
+
+    saveTaskActivity(
+      updatedTask.id,
+      "updated",
+      `Verantwortlicher geändert: ${previousAssignee} → ${updatedAssignee}`
+    );
+  }
+
+  if (
+    previousTask.dueDate !==
+    updatedTask.dueDate
+  ) {
+    saveTaskActivity(
+      updatedTask.id,
+      "updated",
+      `Fälligkeitsdatum geändert: ${formatActivityDate(
+        previousTask.dueDate
+      )} → ${formatActivityDate(
+        updatedTask.dueDate
+      )}`
+    );
   }
 }
 
@@ -184,7 +411,9 @@ export default function ProjectTaskManager({
   onTaskActivity,
 }: ProjectTaskManagerProps) {
   const [tasks, setTasks] =
-    useState<ProjectTask[]>(initialTasks);
+    useState<ProjectTask[]>(
+      initialTasks
+    );
 
   const [form, setForm] =
     useState<TaskFormState>(
@@ -257,7 +486,10 @@ export default function ProjectTaskManager({
 
   const projectTasks = useMemo(() => {
     return sortProjectTasks(
-      getProjectTasks(tasks, projectId)
+      getProjectTasks(
+        tasks,
+        projectId
+      )
     );
   }, [projectId, tasks]);
 
@@ -269,7 +501,8 @@ export default function ProjectTaskManager({
     return (
       tasks.find(
         (task) =>
-          task.id === selectedTaskId
+          task.id ===
+          selectedTaskId
       ) ?? null
     );
   }, [selectedTaskId, tasks]);
@@ -297,7 +530,9 @@ export default function ProjectTaskManager({
 
   const filteredTasks = useMemo(() => {
     const normalizedSearch =
-      searchQuery.trim().toLowerCase();
+      searchQuery
+        .trim()
+        .toLowerCase();
 
     const matchingTasks =
       projectTasks.filter((task) => {
@@ -305,17 +540,24 @@ export default function ProjectTaskManager({
           !normalizedSearch ||
           task.title
             .toLowerCase()
-            .includes(normalizedSearch) ||
+            .includes(
+              normalizedSearch
+            ) ||
           task.description
             .toLowerCase()
-            .includes(normalizedSearch) ||
+            .includes(
+              normalizedSearch
+            ) ||
           task.assignee
             .toLowerCase()
-            .includes(normalizedSearch);
+            .includes(
+              normalizedSearch
+            );
 
         const matchesStatus =
           statusFilter === "all" ||
-          task.status === statusFilter;
+          task.status ===
+            statusFilter;
 
         const matchesPriority =
           priorityFilter === "all" ||
@@ -363,7 +605,8 @@ export default function ProjectTaskManager({
   const completedCount =
     projectTasks.filter(
       (task) =>
-        task.status === "completed"
+        task.status ===
+        "completed"
     ).length;
 
   const hasActiveFilters =
@@ -427,11 +670,13 @@ export default function ProjectTaskManager({
 
     setForm({
       title: task.title,
-      description: task.description,
+      description:
+        task.description,
       status: task.status,
       priority: task.priority,
       assignee: task.assignee,
-      dueDate: task.dueDate ?? "",
+      dueDate:
+        task.dueDate ?? "",
     });
 
     setEditingTaskId(task.id);
@@ -443,6 +688,11 @@ export default function ProjectTaskManager({
     previousTask: ProjectTask,
     updatedTask: ProjectTask
   ) {
+    logTaskChanges(
+      previousTask,
+      updatedTask
+    );
+
     if (!onTaskActivity) {
       return;
     }
@@ -527,11 +777,12 @@ export default function ProjectTaskManager({
             }
           );
 
-        setTasks((currentTasks) =>
-          replaceProjectTask(
-            currentTasks,
-            updatedTask
-          )
+        setTasks(
+          (currentTasks) =>
+            replaceProjectTask(
+              currentTasks,
+              updatedTask
+            )
         );
 
         emitTaskUpdateActivity(
@@ -553,10 +804,12 @@ export default function ProjectTaskManager({
             dueDate,
           });
 
-        setTasks((currentTasks) => [
-          ...currentTasks,
-          newTask,
-        ]);
+        setTasks(
+          (currentTasks) => [
+            ...currentTasks,
+            newTask,
+          ]
+        );
 
         onTaskActivity?.(
           createTaskAddedActivity(
@@ -589,25 +842,9 @@ export default function ProjectTaskManager({
       )
     );
 
-    if (
-      updatedTask.status ===
-      "completed"
-    ) {
-      onTaskActivity?.(
-        createTaskCompletedActivity(
-          projectId,
-          updatedTask.title
-        )
-      );
-
-      return;
-    }
-
-    onTaskActivity?.(
-      createTaskReopenedActivity(
-        projectId,
-        updatedTask.title
-      )
+    emitTaskUpdateActivity(
+      task,
+      updatedTask
     );
   }
 
