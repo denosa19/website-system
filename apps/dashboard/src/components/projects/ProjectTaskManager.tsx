@@ -33,6 +33,7 @@ import type {
 import type { TimelineEvent } from "@/types/timeline";
 import ProjectTaskBoard from "./ProjectTaskBoard";
 import ProjectTaskCalendar from "./ProjectTaskCalendar";
+import ProjectTaskDetailPanel from "./ProjectTaskDetailPanel";
 import ProjectTaskFilters, {
   type PriorityFilter,
   type StatusFilter,
@@ -69,9 +70,8 @@ function loadStoredTasks(): ProjectTask[] {
     return initialTasks;
   }
 
-  const storedTasks = window.localStorage.getItem(
-    STORAGE_KEY
-  );
+  const storedTasks =
+    window.localStorage.getItem(STORAGE_KEY);
 
   if (!storedTasks) {
     return initialTasks;
@@ -163,12 +163,9 @@ function sortFilteredTasks(
       }
 
       const dueDateDifference =
-        new Date(
-          firstTask.dueDate
-        ).getTime() -
-        new Date(
+        firstTask.dueDate.localeCompare(
           secondTask.dueDate
-        ).getTime();
+        );
 
       if (dueDateDifference !== 0) {
         return dueDateDifference;
@@ -197,6 +194,11 @@ export default function ProjectTaskManager({
   const [
     editingTaskId,
     setEditingTaskId,
+  ] = useState<string | null>(null);
+
+  const [
+    selectedTaskId,
+    setSelectedTaskId,
   ] = useState<string | null>(null);
 
   const [isFormOpen, setIsFormOpen] =
@@ -258,6 +260,19 @@ export default function ProjectTaskManager({
       getProjectTasks(tasks, projectId)
     );
   }, [projectId, tasks]);
+
+  const selectedTask = useMemo(() => {
+    if (!selectedTaskId) {
+      return null;
+    }
+
+    return (
+      tasks.find(
+        (task) =>
+          task.id === selectedTaskId
+      ) ?? null
+    );
+  }, [selectedTaskId, tasks]);
 
   const assignees = useMemo(() => {
     return Array.from(
@@ -388,15 +403,28 @@ export default function ProjectTaskManager({
   }
 
   function openCreateForm() {
+    setSelectedTaskId(null);
     setForm(EMPTY_TASK_FORM);
     setEditingTaskId(null);
     setErrorMessage("");
     setIsFormOpen(true);
   }
 
+  function openTaskDetails(
+    task: ProjectTask
+  ) {
+    setSelectedTaskId(task.id);
+  }
+
+  function closeTaskDetails() {
+    setSelectedTaskId(null);
+  }
+
   function openEditForm(
     task: ProjectTask
   ) {
+    setSelectedTaskId(null);
+
     setForm({
       title: task.title,
       description: task.description,
@@ -465,19 +493,8 @@ export default function ProjectTaskManager({
     event.preventDefault();
     setErrorMessage("");
 
-    const formData = new FormData(
-      event.currentTarget
-    );
-
-    const submittedDueDate =
-      formData.get("dueDate");
-
     const dueDate =
-      typeof submittedDueDate ===
-        "string" &&
-      submittedDueDate.trim()
-        ? submittedDueDate.trim()
-        : null;
+      form.dueDate.trim() || null;
 
     try {
       if (editingTaskId) {
@@ -602,15 +619,9 @@ export default function ProjectTaskManager({
       return;
     }
 
-    const completedAt =
-      status === "completed"
-        ? new Date().toISOString()
-        : null;
-
     const updatedTask =
       updateProjectTask(task, {
         status,
-        completedAt,
       });
 
     setTasks((currentTasks) =>
@@ -653,6 +664,12 @@ export default function ProjectTaskManager({
     );
 
     if (
+      selectedTaskId === task.id
+    ) {
+      setSelectedTaskId(null);
+    }
+
+    if (
       editingTaskId === task.id
     ) {
       resetForm();
@@ -660,202 +677,220 @@ export default function ProjectTaskManager({
   }
 
   return (
-    <section className="rounded-2xl border border-neutral-800 bg-neutral-950 p-5 sm:p-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div>
-          <p className="text-sm font-medium text-neutral-500">
-            Projektorganisation
-          </p>
-
-          <h2 className="mt-1 text-xl font-semibold text-white">
-            Aufgaben
-          </h2>
-
-          <p className="mt-2 text-sm text-neutral-400">
-            {completedCount} von{" "}
-            {projectTasks.length} Aufgaben
-            erledigt
-          </p>
-        </div>
-
-        <button
-          type="button"
-          onClick={openCreateForm}
-          className="rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
-        >
-          Aufgabe erstellen
-        </button>
-      </div>
-
-      <div className="mt-5">
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-neutral-400">
-            Projektfortschritt
-          </span>
-
-          <span className="font-semibold text-white">
-            {progress} %
-          </span>
-        </div>
-
-        <div className="mt-2 h-2 overflow-hidden rounded-full bg-neutral-800">
-          <div
-            className="h-full rounded-full bg-white transition-all"
-            style={{
-              width: `${progress}%`,
-            }}
-          />
-        </div>
-      </div>
-
-      {isFormOpen ? (
-        <ProjectTaskForm
-          form={form}
-          editingTaskId={
-            editingTaskId
-          }
-          errorMessage={errorMessage}
-          onChange={updateForm}
-          onSubmit={handleSubmit}
-          onClose={resetForm}
-        />
-      ) : null}
-
-      <div className="mt-6">
-        <ProjectTaskFilters
-          searchQuery={searchQuery}
-          statusFilter={statusFilter}
-          priorityFilter={
-            priorityFilter
-          }
-          assigneeFilter={
-            assigneeFilter
-          }
-          assignees={assignees}
-          onlyOverdue={onlyOverdue}
-          taskSort={taskSort}
-          hasActiveFilters={
-            hasActiveFilters
-          }
-          onSearchChange={
-            setSearchQuery
-          }
-          onStatusChange={
-            setStatusFilter
-          }
-          onPriorityChange={
-            setPriorityFilter
-          }
-          onAssigneeChange={
-            setAssigneeFilter
-          }
-          onOverdueChange={
-            setOnlyOverdue
-          }
-          onSortChange={setTaskSort}
-          onReset={resetFilters}
-        />
-      </div>
-
-      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="text-sm font-medium text-white">
-            Aufgabenansicht
-          </p>
-
-          <p className="mt-1 text-xs text-neutral-500">
-            {filteredTasks.length} von{" "}
-            {projectTasks.length} Aufgaben
-            werden angezeigt
-          </p>
-        </div>
-
-        <div className="inline-flex w-fit rounded-lg border border-neutral-800 bg-neutral-900 p-1">
-          <button
-            type="button"
-            onClick={() =>
-              setTaskView("board")
-            }
-            aria-pressed={
-              taskView === "board"
-            }
-            className={`rounded-md px-4 py-2 text-sm font-medium transition ${
-              taskView === "board"
-                ? "bg-white text-neutral-950"
-                : "text-neutral-400 hover:bg-neutral-800 hover:text-white"
-            }`}
-          >
-            Kanban
-          </button>
-
-          <button
-            type="button"
-            onClick={() =>
-              setTaskView("calendar")
-            }
-            aria-pressed={
-              taskView === "calendar"
-            }
-            className={`rounded-md px-4 py-2 text-sm font-medium transition ${
-              taskView === "calendar"
-                ? "bg-white text-neutral-950"
-                : "text-neutral-400 hover:bg-neutral-800 hover:text-white"
-            }`}
-          >
-            Kalender
-          </button>
-        </div>
-      </div>
-
-      <div className="mt-4">
-        {filteredTasks.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-neutral-800 bg-neutral-900/40 px-6 py-12 text-center">
-            <h3 className="text-sm font-semibold text-white">
-              Keine Aufgaben gefunden
-            </h3>
-
-            <p className="mt-2 text-sm text-neutral-500">
-              Passe die Filter an oder
-              erstelle eine neue Aufgabe.
+    <>
+      <section className="rounded-2xl border border-neutral-800 bg-neutral-950 p-5 sm:p-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <p className="text-sm font-medium text-neutral-500">
+              Projektorganisation
             </p>
 
-            {hasActiveFilters ? (
-              <button
-                type="button"
-                onClick={resetFilters}
-                className="mt-5 rounded-lg border border-neutral-700 px-4 py-2.5 text-sm font-medium text-neutral-300 transition hover:bg-neutral-800 hover:text-white"
-              >
-                Filter zurücksetzen
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={openCreateForm}
-                className="mt-5 rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
-              >
-                Aufgabe erstellen
-              </button>
-            )}
+            <h2 className="mt-1 text-xl font-semibold text-white">
+              Aufgaben
+            </h2>
+
+            <p className="mt-2 text-sm text-neutral-400">
+              {completedCount} von{" "}
+              {projectTasks.length} Aufgaben
+              erledigt
+            </p>
           </div>
-        ) : taskView === "calendar" ? (
-          <ProjectTaskCalendar
-            tasks={filteredTasks}
-            onEditTask={openEditForm}
-          />
-        ) : (
-          <ProjectTaskBoard
-            tasks={filteredTasks}
-            onEditTask={openEditForm}
-            onToggleCompleted={
-              handleToggleCompleted
+
+          <button
+            type="button"
+            onClick={openCreateForm}
+            className="rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
+          >
+            Aufgabe erstellen
+          </button>
+        </div>
+
+        <div className="mt-5">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-neutral-400">
+              Projektfortschritt
+            </span>
+
+            <span className="font-semibold text-white">
+              {progress} %
+            </span>
+          </div>
+
+          <div className="mt-2 h-2 overflow-hidden rounded-full bg-neutral-800">
+            <div
+              className="h-full rounded-full bg-white transition-all"
+              style={{
+                width: `${progress}%`,
+              }}
+            />
+          </div>
+        </div>
+
+        {isFormOpen ? (
+          <ProjectTaskForm
+            form={form}
+            editingTaskId={
+              editingTaskId
             }
-            onDeleteTask={handleDelete}
+            errorMessage={errorMessage}
+            onChange={updateForm}
+            onSubmit={handleSubmit}
+            onClose={resetForm}
+          />
+        ) : null}
+
+        <div className="mt-6">
+          <ProjectTaskFilters
+            searchQuery={searchQuery}
+            statusFilter={statusFilter}
+            priorityFilter={
+              priorityFilter
+            }
+            assigneeFilter={
+              assigneeFilter
+            }
+            assignees={assignees}
+            onlyOverdue={onlyOverdue}
+            taskSort={taskSort}
+            hasActiveFilters={
+              hasActiveFilters
+            }
+            onSearchChange={
+              setSearchQuery
+            }
             onStatusChange={
-              handleStatusChange
+              setStatusFilter
             }
+            onPriorityChange={
+              setPriorityFilter
+            }
+            onAssigneeChange={
+              setAssigneeFilter
+            }
+            onOverdueChange={
+              setOnlyOverdue
+            }
+            onSortChange={setTaskSort}
+            onReset={resetFilters}
           />
-        )}
-      </div>
-    </section>
+        </div>
+
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-medium text-white">
+              Aufgabenansicht
+            </p>
+
+            <p className="mt-1 text-xs text-neutral-500">
+              {filteredTasks.length} von{" "}
+              {projectTasks.length} Aufgaben
+              werden angezeigt
+            </p>
+          </div>
+
+          <div className="inline-flex w-fit rounded-lg border border-neutral-800 bg-neutral-900 p-1">
+            <button
+              type="button"
+              onClick={() =>
+                setTaskView("board")
+              }
+              aria-pressed={
+                taskView === "board"
+              }
+              className={`rounded-md px-4 py-2 text-sm font-medium transition ${
+                taskView === "board"
+                  ? "bg-white text-neutral-950"
+                  : "text-neutral-400 hover:bg-neutral-800 hover:text-white"
+              }`}
+            >
+              Kanban
+            </button>
+
+            <button
+              type="button"
+              onClick={() =>
+                setTaskView("calendar")
+              }
+              aria-pressed={
+                taskView === "calendar"
+              }
+              className={`rounded-md px-4 py-2 text-sm font-medium transition ${
+                taskView === "calendar"
+                  ? "bg-white text-neutral-950"
+                  : "text-neutral-400 hover:bg-neutral-800 hover:text-white"
+              }`}
+            >
+              Kalender
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-4">
+          {filteredTasks.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-neutral-800 bg-neutral-900/40 px-6 py-12 text-center">
+              <h3 className="text-sm font-semibold text-white">
+                Keine Aufgaben gefunden
+              </h3>
+
+              <p className="mt-2 text-sm text-neutral-500">
+                Passe die Filter an oder
+                erstelle eine neue Aufgabe.
+              </p>
+
+              {hasActiveFilters ? (
+                <button
+                  type="button"
+                  onClick={resetFilters}
+                  className="mt-5 rounded-lg border border-neutral-700 px-4 py-2.5 text-sm font-medium text-neutral-300 transition hover:bg-neutral-800 hover:text-white"
+                >
+                  Filter zurücksetzen
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={openCreateForm}
+                  className="mt-5 rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
+                >
+                  Aufgabe erstellen
+                </button>
+              )}
+            </div>
+          ) : taskView === "calendar" ? (
+            <ProjectTaskCalendar
+              tasks={filteredTasks}
+              onEditTask={
+                openTaskDetails
+              }
+            />
+          ) : (
+            <ProjectTaskBoard
+              tasks={filteredTasks}
+              onEditTask={
+                openTaskDetails
+              }
+              onToggleCompleted={
+                handleToggleCompleted
+              }
+              onDeleteTask={
+                handleDelete
+              }
+              onStatusChange={
+                handleStatusChange
+              }
+            />
+          )}
+        </div>
+      </section>
+
+      <ProjectTaskDetailPanel
+        task={selectedTask}
+        onClose={closeTaskDetails}
+        onEditTask={openEditForm}
+        onToggleCompleted={
+          handleToggleCompleted
+        }
+        onDeleteTask={handleDelete}
+      />
+    </>
   );
 }
