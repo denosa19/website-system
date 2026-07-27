@@ -3,17 +3,8 @@ import type {
   TaskActivity,
 } from "@/types/taskActivity";
 
-function createId(): string {
-  if (
-    typeof crypto !== "undefined" &&
-    typeof crypto.randomUUID === "function"
-  ) {
-    return crypto.randomUUID();
-  }
-
-  return `${Date.now()}-${Math.random()
-    .toString(36)
-    .slice(2)}`;
+function createId() {
+  return `activity_${crypto.randomUUID()}`;
 }
 
 export function createTaskActivity(
@@ -27,6 +18,18 @@ export function createTaskActivity(
     message: input.message,
     createdAt: new Date().toISOString(),
   };
+}
+
+export function createTaskCreatedActivity(
+  taskId: string,
+  author: string
+): TaskActivity {
+  return createTaskActivity({
+    taskId,
+    author,
+    type: "created",
+    message: "Aufgabe erstellt",
+  });
 }
 
 export function getTaskActivities(
