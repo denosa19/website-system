@@ -1,8 +1,12 @@
+import {
+  createTaskCreatedActivity,
+} from "@/lib/taskActivity";
 import type {
   ProjectTask,
   ProjectTaskPriority,
   ProjectTaskStatus,
 } from "@/types/task";
+import type { TaskActivity } from "@/types/taskActivity";
 
 export type CreateProjectTaskInput = {
   projectId: string;
@@ -22,6 +26,9 @@ export type UpdateProjectTaskInput = {
   assignee?: string;
   dueDate?: string | null;
 };
+
+const TASK_ACTIVITIES_STORAGE_KEY =
+  "website-system-task-activities";
 
 function createTaskId(): string {
   if (
@@ -52,6 +59,68 @@ function normalizeDueDate(
   return normalizedDate || null;
 }
 
+function readStoredTaskActivities(): TaskActivity[] {
+  if (typeof window === "undefined") {
+    return [];
+  }
+
+  try {
+    const storedValue =
+      window.localStorage.getItem(
+        TASK_ACTIVITIES_STORAGE_KEY
+      );
+
+    if (!storedValue) {
+      return [];
+    }
+
+    const parsedValue: unknown =
+      JSON.parse(storedValue);
+
+    if (!Array.isArray(parsedValue)) {
+      return [];
+    }
+
+    return parsedValue as TaskActivity[];
+  } catch {
+    return [];
+  }
+}
+
+function saveTaskCreatedActivity(
+  task: ProjectTask
+) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  const activity =
+    createTaskCreatedActivity(
+      task.id,
+      task.assignee || "Dennis"
+    );
+
+  const currentActivities =
+    readStoredTaskActivities();
+
+  const nextActivities = [
+    ...currentActivities,
+    activity,
+  ];
+
+  try {
+    window.localStorage.setItem(
+      TASK_ACTIVITIES_STORAGE_KEY,
+      JSON.stringify(nextActivities)
+    );
+  } catch (error) {
+    console.error(
+      "Die Aktivität zur Aufgabenerstellung konnte nicht gespeichert werden.",
+      error
+    );
+  }
+}
+
 export function createProjectTask(
   input: CreateProjectTaskInput
 ): ProjectTask {
@@ -72,20 +141,30 @@ export function createProjectTask(
   const now = new Date().toISOString();
   const status = input.status ?? "open";
 
-  return {
+  const task: ProjectTask = {
     id: createTaskId(),
     projectId: input.projectId.trim(),
     title,
-    description: normalizeText(input.description ?? ""),
+    description: normalizeText(
+      input.description ?? ""
+    ),
     status,
     priority: input.priority ?? "medium",
-    assignee: normalizeText(input.assignee ?? ""),
-    dueDate: normalizeDueDate(input.dueDate),
+    assignee: normalizeText(
+      input.assignee ?? ""
+    ),
+    dueDate: normalizeDueDate(
+      input.dueDate
+    ),
     createdAt: now,
     updatedAt: now,
     completedAt:
       status === "completed" ? now : null,
   };
+
+  saveTaskCreatedActivity(task);
+
+  return task;
 }
 
 export function updateProjectTask(
@@ -236,8 +315,10 @@ export function isTaskOverdue(
     `${task.dueDate}T23:59:59.999`
   );
 
-  return dueDate.getTime() <
-    currentDate.getTime();
+  return (
+    dueDate.getTime() <
+    currentDate.getTime()
+  );
 }
 
 export function isTaskDueToday(
@@ -252,9 +333,11 @@ export function isTaskDueToday(
   }
 
   const year = currentDate.getFullYear();
+
   const month = String(
     currentDate.getMonth() + 1
   ).padStart(2, "0");
+
   const day = String(
     currentDate.getDate()
   ).padStart(2, "0");
@@ -287,42 +370,48 @@ export function sortProjectTasks(
     low: 3,
   };
 
-  return [...tasks].sort((firstTask, secondTask) => {
-    const statusDifference =
-      statusOrder[firstTask.status] -
-      statusOrder[secondTask.status];
+  return [...tasks].sort(
+    (firstTask, secondTask) => {
+      const statusDifference =
+        statusOrder[firstTask.status] -
+        statusOrder[secondTask.status];
 
-    if (statusDifference !== 0) {
-      return statusDifference;
-    }
+      if (statusDifference !== 0) {
+        return statusDifference;
+      }
 
-    const priorityDifference =
-      priorityOrder[firstTask.priority] -
-      priorityOrder[secondTask.priority];
+      const priorityDifference =
+        priorityOrder[
+          firstTask.priority
+        ] -
+        priorityOrder[
+          secondTask.priority
+        ];
 
-    if (priorityDifference !== 0) {
-      return priorityDifference;
-    }
+      if (priorityDifference !== 0) {
+        return priorityDifference;
+      }
 
-    if (
-      firstTask.dueDate &&
-      secondTask.dueDate
-    ) {
-      return firstTask.dueDate.localeCompare(
+      if (
+        firstTask.dueDate &&
         secondTask.dueDate
+      ) {
+        return firstTask.dueDate.localeCompare(
+          secondTask.dueDate
+        );
+      }
+
+      if (firstTask.dueDate) {
+        return -1;
+      }
+
+      if (secondTask.dueDate) {
+        return 1;
+      }
+
+      return firstTask.createdAt.localeCompare(
+        secondTask.createdAt
       );
     }
-
-    if (firstTask.dueDate) {
-      return -1;
-    }
-
-    if (secondTask.dueDate) {
-      return 1;
-    }
-
-    return firstTask.createdAt.localeCompare(
-      secondTask.createdAt
-    );
-  });
+  );
 }
