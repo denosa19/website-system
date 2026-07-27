@@ -1,19 +1,35 @@
 "use client";
 
-import { useEffect } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import ProjectTaskComments from "@/components/projects/ProjectTaskComments";
+import { taskComments as initialTaskComments } from "@/data/taskComments";
+import {
+  createTaskComment,
+  getTaskComments,
+} from "@/lib/taskComments";
 import type {
   ProjectTask,
   ProjectTaskPriority,
   ProjectTaskStatus,
 } from "@/types/task";
+import type { TaskComment } from "@/types/taskComment";
 
 type ProjectTaskDetailPanelProps = {
   task: ProjectTask | null;
   onClose: () => void;
   onEditTask: (task: ProjectTask) => void;
-  onToggleCompleted: (task: ProjectTask) => void;
+  onToggleCompleted: (
+    task: ProjectTask
+  ) => void;
   onDeleteTask: (task: ProjectTask) => void;
 };
+
+const TASK_COMMENTS_STORAGE_KEY =
+  "website-system-task-comments";
 
 const STATUS_LABELS: Record<
   ProjectTaskStatus,
@@ -114,6 +130,34 @@ function isTaskOverdue(
   return dueDate.getTime() < Date.now();
 }
 
+function readStoredComments(): TaskComment[] {
+  if (typeof window === "undefined") {
+    return initialTaskComments;
+  }
+
+  try {
+    const storedValue =
+      window.localStorage.getItem(
+        TASK_COMMENTS_STORAGE_KEY
+      );
+
+    if (!storedValue) {
+      return initialTaskComments;
+    }
+
+    const parsedValue: unknown =
+      JSON.parse(storedValue);
+
+    if (!Array.isArray(parsedValue)) {
+      return initialTaskComments;
+    }
+
+    return parsedValue as TaskComment[];
+  } catch {
+    return initialTaskComments;
+  }
+}
+
 function DetailRow({
   label,
   value,
@@ -141,6 +185,34 @@ export default function ProjectTaskDetailPanel({
   onToggleCompleted,
   onDeleteTask,
 }: ProjectTaskDetailPanelProps) {
+  const [comments, setComments] =
+    useState<TaskComment[]>(
+      initialTaskComments
+    );
+
+  const [commentsLoaded, setCommentsLoaded] =
+    useState(false);
+
+  useEffect(() => {
+    setComments(readStoredComments());
+    setCommentsLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (!commentsLoaded) {
+      return;
+    }
+
+    try {
+      window.localStorage.setItem(
+        TASK_COMMENTS_STORAGE_KEY,
+        JSON.stringify(comments)
+      );
+    } catch {
+      return;
+    }
+  }, [comments, commentsLoaded]);
+
   useEffect(() => {
     if (!task) {
       return;
@@ -176,6 +248,17 @@ export default function ProjectTaskDetailPanel({
     };
   }, [onClose, task]);
 
+  const visibleComments = useMemo(() => {
+    if (!task) {
+      return [];
+    }
+
+    return getTaskComments(
+      comments,
+      task.id
+    );
+  }, [comments, task]);
+
   if (!task) {
     return null;
   }
@@ -193,6 +276,22 @@ export default function ProjectTaskDetailPanel({
 
   function handleDelete() {
     onDeleteTask(task);
+  }
+
+  function handleAddComment(
+    message: string
+  ) {
+    const newComment =
+      createTaskComment({
+        taskId: task.id,
+        author: "Dennis",
+        message,
+      });
+
+    setComments((currentComments) => [
+      ...currentComments,
+      newComment,
+    ]);
   }
 
   return (
@@ -333,6 +432,13 @@ export default function ProjectTaskDetailPanel({
               ) : null}
             </dl>
           </section>
+
+          <ProjectTaskComments
+            comments={visibleComments}
+            onAddComment={
+              handleAddComment
+            }
+          />
         </div>
 
         <footer className="border-t border-neutral-800 bg-neutral-950 px-5 py-4 sm:px-6">
