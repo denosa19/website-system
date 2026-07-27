@@ -5,8 +5,15 @@ import {
   useMemo,
   useState,
 } from "react";
+import ProjectTaskAttachments from "@/components/projects/ProjectTaskAttachments";
 import ProjectTaskComments from "@/components/projects/ProjectTaskComments";
+import { taskAttachments as initialTaskAttachments } from "@/data/taskAttachments";
 import { taskComments as initialTaskComments } from "@/data/taskComments";
+import {
+  createTaskAttachment,
+  deleteTaskAttachment,
+  getTaskAttachments,
+} from "@/lib/taskAttachments";
 import {
   createTaskComment,
   deleteTaskComment,
@@ -19,6 +26,7 @@ import type {
   ProjectTaskPriority,
   ProjectTaskStatus,
 } from "@/types/task";
+import type { TaskAttachment } from "@/types/taskAttachment";
 import type { TaskComment } from "@/types/taskComment";
 
 type ProjectTaskDetailPanelProps = {
@@ -33,6 +41,9 @@ type ProjectTaskDetailPanelProps = {
 
 const TASK_COMMENTS_STORAGE_KEY =
   "website-system-task-comments";
+
+const TASK_ATTACHMENTS_STORAGE_KEY =
+  "website-system-task-attachments";
 
 const STATUS_LABELS: Record<
   ProjectTaskStatus,
@@ -161,6 +172,71 @@ function readStoredComments(): TaskComment[] {
   }
 }
 
+function readStoredAttachments(): TaskAttachment[] {
+  if (typeof window === "undefined") {
+    return initialTaskAttachments;
+  }
+
+  try {
+    const storedValue =
+      window.localStorage.getItem(
+        TASK_ATTACHMENTS_STORAGE_KEY
+      );
+
+    if (!storedValue) {
+      return initialTaskAttachments;
+    }
+
+    const parsedValue: unknown =
+      JSON.parse(storedValue);
+
+    if (!Array.isArray(parsedValue)) {
+      return initialTaskAttachments;
+    }
+
+    return parsedValue as TaskAttachment[];
+  } catch {
+    return initialTaskAttachments;
+  }
+}
+
+function readFileAsDataUrl(
+  file: File
+): Promise<string> {
+  return new Promise(
+    (resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        if (
+          typeof reader.result !== "string"
+        ) {
+          reject(
+            new Error(
+              "Datei konnte nicht gelesen werden."
+            )
+          );
+
+          return;
+        }
+
+        resolve(reader.result);
+      };
+
+      reader.onerror = () => {
+        reject(
+          reader.error ??
+            new Error(
+              "Datei konnte nicht gelesen werden."
+            )
+        );
+      };
+
+      reader.readAsDataURL(file);
+    }
+  );
+}
+
 function DetailRow({
   label,
   value,
@@ -196,9 +272,24 @@ export default function ProjectTaskDetailPanel({
   const [commentsLoaded, setCommentsLoaded] =
     useState(false);
 
+  const [attachments, setAttachments] =
+    useState<TaskAttachment[]>(
+      initialTaskAttachments
+    );
+
+  const [
+    attachmentsLoaded,
+    setAttachmentsLoaded,
+  ] = useState(false);
+
   useEffect(() => {
     setComments(readStoredComments());
     setCommentsLoaded(true);
+
+    setAttachments(
+      readStoredAttachments()
+    );
+    setAttachmentsLoaded(true);
   }, []);
 
   useEffect(() => {
@@ -215,6 +306,24 @@ export default function ProjectTaskDetailPanel({
       return;
     }
   }, [comments, commentsLoaded]);
+
+  useEffect(() => {
+    if (!attachmentsLoaded) {
+      return;
+    }
+
+    try {
+      window.localStorage.setItem(
+        TASK_ATTACHMENTS_STORAGE_KEY,
+        JSON.stringify(attachments)
+      );
+    } catch {
+      return;
+    }
+  }, [
+    attachments,
+    attachmentsLoaded,
+  ]);
 
   useEffect(() => {
     if (!task) {
@@ -261,6 +370,17 @@ export default function ProjectTaskDetailPanel({
       task.id
     );
   }, [comments, task]);
+
+  const visibleAttachments = useMemo(() => {
+    if (!task) {
+      return [];
+    }
+
+    return getTaskAttachments(
+      attachments,
+      task.id
+    );
+  }, [attachments, task]);
 
   if (!task) {
     return null;
@@ -322,6 +442,59 @@ export default function ProjectTaskDetailPanel({
         currentComments,
         comment.id
       )
+    );
+  }
+
+  async function handleUploadAttachments(
+    files: FileList
+  ) {
+    try {
+      const newAttachments =
+        await Promise.all(
+          Array.from(files).map(
+            async (file) => {
+              const dataUrl =
+                await readFileAsDataUrl(
+                  file
+                );
+
+              return createTaskAttachment({
+                taskId: task.id,
+                name: file.name,
+                type:
+                  file.type ||
+                  "application/octet-stream",
+                size: file.size,
+                dataUrl,
+                uploadedBy: "Dennis",
+              });
+            }
+          )
+        );
+
+      setAttachments(
+        (currentAttachments) => [
+          ...currentAttachments,
+          ...newAttachments,
+        ]
+      );
+    } catch (error) {
+      console.error(
+        "Dateianhang konnte nicht gespeichert werden.",
+        error
+      );
+    }
+  }
+
+  function handleDeleteAttachment(
+    attachment: TaskAttachment
+  ) {
+    setAttachments(
+      (currentAttachments) =>
+        deleteTaskAttachment(
+          currentAttachments,
+          attachment.id
+        )
     );
   }
 
@@ -463,6 +636,18 @@ export default function ProjectTaskDetailPanel({
               ) : null}
             </dl>
           </section>
+
+          <ProjectTaskAttachments
+            attachments={
+              visibleAttachments
+            }
+            onUpload={
+              handleUploadAttachments
+            }
+            onDelete={
+              handleDeleteAttachment
+            }
+          />
 
           <ProjectTaskComments
             comments={visibleComments}
