@@ -16,7 +16,10 @@ import {
   deleteTaskAttachment,
   getTaskAttachments,
 } from "@/lib/taskAttachments";
-import { getTaskActivities } from "@/lib/taskActivity";
+import {
+  createTaskActivity,
+  getTaskActivities,
+} from "@/lib/taskActivity";
 import {
   createTaskComment,
   deleteTaskComment,
@@ -467,6 +470,26 @@ export default function ProjectTaskDetailPanel({
 
   const overdue = isTaskOverdue(task);
 
+  function addActivity(
+    type: TaskActivity["type"],
+    message: string
+  ) {
+    const newActivity =
+      createTaskActivity({
+        taskId: task.id,
+        type,
+        author: "Dennis",
+        message,
+      });
+
+    setActivities(
+      (currentActivities) => [
+        ...currentActivities,
+        newActivity,
+      ]
+    );
+  }
+
   function handleEdit() {
     onEditTask(task);
     onClose();
@@ -494,6 +517,11 @@ export default function ProjectTaskDetailPanel({
       ...currentComments,
       newComment,
     ]);
+
+    addActivity(
+      "comment_added",
+      message
+    );
   }
 
   function handleUpdateComment(
@@ -511,6 +539,11 @@ export default function ProjectTaskDetailPanel({
         updatedComment
       )
     );
+
+    addActivity(
+      "comment_updated",
+      message
+    );
   }
 
   function handleDeleteComment(
@@ -521,6 +554,11 @@ export default function ProjectTaskDetailPanel({
         currentComments,
         comment.id
       )
+    );
+
+    addActivity(
+      "comment_deleted",
+      comment.message
     );
   }
 
@@ -557,6 +595,15 @@ export default function ProjectTaskDetailPanel({
           ...newAttachments,
         ]
       );
+
+      newAttachments.forEach(
+        (attachment) => {
+          addActivity(
+            "attachment_added",
+            attachment.name
+          );
+        }
+      );
     } catch (error) {
       console.error(
         "Dateianhang konnte nicht gespeichert werden.",
@@ -574,6 +621,11 @@ export default function ProjectTaskDetailPanel({
           currentAttachments,
           attachment.id
         )
+    );
+
+    addActivity(
+      "attachment_deleted",
+      attachment.name
     );
   }
 
