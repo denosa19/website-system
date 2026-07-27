@@ -5,8 +5,10 @@ import {
   useMemo,
   useState,
 } from "react";
+import ProjectTaskActivity from "@/components/projects/ProjectTaskActivity";
 import ProjectTaskAttachments from "@/components/projects/ProjectTaskAttachments";
 import ProjectTaskComments from "@/components/projects/ProjectTaskComments";
+import { taskActivities as initialTaskActivities } from "@/data/taskActivities";
 import { taskAttachments as initialTaskAttachments } from "@/data/taskAttachments";
 import { taskComments as initialTaskComments } from "@/data/taskComments";
 import {
@@ -14,6 +16,7 @@ import {
   deleteTaskAttachment,
   getTaskAttachments,
 } from "@/lib/taskAttachments";
+import { getTaskActivities } from "@/lib/taskActivity";
 import {
   createTaskComment,
   deleteTaskComment,
@@ -26,6 +29,7 @@ import type {
   ProjectTaskPriority,
   ProjectTaskStatus,
 } from "@/types/task";
+import type { TaskActivity } from "@/types/taskActivity";
 import type { TaskAttachment } from "@/types/taskAttachment";
 import type { TaskComment } from "@/types/taskComment";
 
@@ -44,6 +48,9 @@ const TASK_COMMENTS_STORAGE_KEY =
 
 const TASK_ATTACHMENTS_STORAGE_KEY =
   "website-system-task-attachments";
+
+const TASK_ACTIVITIES_STORAGE_KEY =
+  "website-system-task-activities";
 
 const STATUS_LABELS: Record<
   ProjectTaskStatus,
@@ -200,6 +207,34 @@ function readStoredAttachments(): TaskAttachment[] {
   }
 }
 
+function readStoredActivities(): TaskActivity[] {
+  if (typeof window === "undefined") {
+    return initialTaskActivities;
+  }
+
+  try {
+    const storedValue =
+      window.localStorage.getItem(
+        TASK_ACTIVITIES_STORAGE_KEY
+      );
+
+    if (!storedValue) {
+      return initialTaskActivities;
+    }
+
+    const parsedValue: unknown =
+      JSON.parse(storedValue);
+
+    if (!Array.isArray(parsedValue)) {
+      return initialTaskActivities;
+    }
+
+    return parsedValue as TaskActivity[];
+  } catch {
+    return initialTaskActivities;
+  }
+}
+
 function readFileAsDataUrl(
   file: File
 ): Promise<string> {
@@ -282,6 +317,16 @@ export default function ProjectTaskDetailPanel({
     setAttachmentsLoaded,
   ] = useState(false);
 
+  const [activities, setActivities] =
+    useState<TaskActivity[]>(
+      initialTaskActivities
+    );
+
+  const [
+    activitiesLoaded,
+    setActivitiesLoaded,
+  ] = useState(false);
+
   useEffect(() => {
     setComments(readStoredComments());
     setCommentsLoaded(true);
@@ -290,6 +335,11 @@ export default function ProjectTaskDetailPanel({
       readStoredAttachments()
     );
     setAttachmentsLoaded(true);
+
+    setActivities(
+      readStoredActivities()
+    );
+    setActivitiesLoaded(true);
   }, []);
 
   useEffect(() => {
@@ -323,6 +373,24 @@ export default function ProjectTaskDetailPanel({
   }, [
     attachments,
     attachmentsLoaded,
+  ]);
+
+  useEffect(() => {
+    if (!activitiesLoaded) {
+      return;
+    }
+
+    try {
+      window.localStorage.setItem(
+        TASK_ACTIVITIES_STORAGE_KEY,
+        JSON.stringify(activities)
+      );
+    } catch {
+      return;
+    }
+  }, [
+    activities,
+    activitiesLoaded,
   ]);
 
   useEffect(() => {
@@ -381,6 +449,17 @@ export default function ProjectTaskDetailPanel({
       task.id
     );
   }, [attachments, task]);
+
+  const visibleActivities = useMemo(() => {
+    if (!task) {
+      return [];
+    }
+
+    return getTaskActivities(
+      activities,
+      task.id
+    );
+  }, [activities, task]);
 
   if (!task) {
     return null;
@@ -646,6 +725,12 @@ export default function ProjectTaskDetailPanel({
             }
             onDelete={
               handleDeleteAttachment
+            }
+          />
+
+          <ProjectTaskActivity
+            activities={
+              visibleActivities
             }
           />
 
