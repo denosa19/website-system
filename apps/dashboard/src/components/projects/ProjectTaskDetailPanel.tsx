@@ -482,12 +482,24 @@ export default function ProjectTaskDetailPanel({
         message,
       });
 
-    setActivities(
-      (currentActivities) => [
-        ...currentActivities,
-        newActivity,
-      ]
-    );
+    const storedActivities =
+      readStoredActivities();
+
+    const nextActivities = [
+      ...storedActivities,
+      newActivity,
+    ];
+
+    try {
+      window.localStorage.setItem(
+        TASK_ACTIVITIES_STORAGE_KEY,
+        JSON.stringify(nextActivities)
+      );
+    } catch {
+      // Die Aktivität bleibt trotzdem im lokalen State sichtbar.
+    }
+
+    setActivities(nextActivities);
   }
 
   function handleEdit() {
@@ -496,6 +508,18 @@ export default function ProjectTaskDetailPanel({
   }
 
   function handleToggleCompleted() {
+    if (task.status === "completed") {
+      addActivity(
+        "status_changed",
+        "Aufgabe wieder geöffnet: Erledigt → Offen"
+      );
+    } else {
+      addActivity(
+        "completed",
+        "Aufgabe abgeschlossen"
+      );
+    }
+
     onToggleCompleted(task);
   }
 
