@@ -9,7 +9,10 @@ import ProjectTaskComments from "@/components/projects/ProjectTaskComments";
 import { taskComments as initialTaskComments } from "@/data/taskComments";
 import {
   createTaskComment,
+  deleteTaskComment,
   getTaskComments,
+  replaceTaskComment,
+  updateTaskComment,
 } from "@/lib/taskComments";
 import type {
   ProjectTask,
@@ -294,6 +297,34 @@ export default function ProjectTaskDetailPanel({
     ]);
   }
 
+  function handleUpdateComment(
+    comment: TaskComment,
+    message: string
+  ) {
+    const updatedComment =
+      updateTaskComment(comment, {
+        message,
+      });
+
+    setComments((currentComments) =>
+      replaceTaskComment(
+        currentComments,
+        updatedComment
+      )
+    );
+  }
+
+  function handleDeleteComment(
+    comment: TaskComment
+  ) {
+    setComments((currentComments) =>
+      deleteTaskComment(
+        currentComments,
+        comment.id
+      )
+    );
+  }
+
   return (
     <div
       role="dialog"
@@ -437,6 +468,12 @@ export default function ProjectTaskDetailPanel({
             comments={visibleComments}
             onAddComment={
               handleAddComment
+            }
+            onUpdateComment={
+              handleUpdateComment
+            }
+            onDeleteComment={
+              handleDeleteComment
             }
           />
         </div>
