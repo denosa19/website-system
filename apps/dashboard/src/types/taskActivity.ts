@@ -12,6 +12,10 @@ export type TaskActivityType =
   | "priority_changed"
   | "assignee_changed"
   | "due_date_changed"
+  | "subtask_added"
+  | "subtask_completed"
+  | "subtask_reopened"
+  | "subtask_deleted"
   | "completed";
 
 export interface TaskActivity {

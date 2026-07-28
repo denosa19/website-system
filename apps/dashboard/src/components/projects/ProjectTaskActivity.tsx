@@ -23,19 +23,18 @@ const ACTIVITY_LABELS: Record<
   priority_changed: "Priorität geändert",
   assignee_changed: "Verantwortlicher geändert",
   due_date_changed: "Fälligkeitsdatum geändert",
+  subtask_added: "Unteraufgabe hinzugefügt",
+  subtask_completed: "Unteraufgabe erledigt",
+  subtask_reopened: "Unteraufgabe wieder geöffnet",
+  subtask_deleted: "Unteraufgabe gelöscht",
   completed: "Aufgabe abgeschlossen",
 };
 
-function formatDate(
-  value: string
-): string {
-  return new Intl.DateTimeFormat(
-    "de-DE",
-    {
-      dateStyle: "medium",
-      timeStyle: "short",
-    }
-  ).format(new Date(value));
+function formatDate(value: string): string {
+  return new Intl.DateTimeFormat("de-DE", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(value));
 }
 
 export default function ProjectTaskActivity({
@@ -53,43 +52,31 @@ export default function ProjectTaskActivity({
             Noch keine Aktivitäten vorhanden.
           </div>
         ) : (
-          activities.map(
-            (activity) => (
-              <article
-                key={activity.id}
-                className="rounded-xl border border-neutral-800 bg-neutral-900 p-4"
-              >
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-sm font-semibold text-white">
-                    {
-                      ACTIVITY_LABELS[
-                        activity.type
-                      ]
-                    }
-                  </p>
-
-                  <time
-                    dateTime={
-                      activity.createdAt
-                    }
-                    className="text-xs text-neutral-500"
-                  >
-                    {formatDate(
-                      activity.createdAt
-                    )}
-                  </time>
-                </div>
-
-                <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-6 text-neutral-300">
-                  {activity.message}
+          activities.map((activity) => (
+            <article
+              key={activity.id}
+              className="rounded-xl border border-neutral-800 bg-neutral-900 p-4"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-sm font-semibold text-white">
+                  {ACTIVITY_LABELS[activity.type]}
                 </p>
+                <time
+                  dateTime={activity.createdAt}
+                  className="text-xs text-neutral-500"
+                >
+                  {formatDate(activity.createdAt)}
+                </time>
+              </div>
 
-                <p className="mt-3 text-xs text-neutral-500">
-                  {activity.author}
-                </p>
-              </article>
-            )
-          )
+              <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-6 text-neutral-300">
+                {activity.message}
+              </p>
+              <p className="mt-3 text-xs text-neutral-500">
+                {activity.author}
+              </p>
+            </article>
+          ))
         )}
       </div>
     </section>
